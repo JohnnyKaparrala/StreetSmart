@@ -17,6 +17,9 @@
     },
     "cordova-plugin-statusbar": {
       "PACKAGE_NAME": "io.cordova.hellocordova"
+    },
+    "cordova-plugin-navigationbar-color": {
+      "PACKAGE_NAME": "io.cordova.hellocordova"
     }
   },
   "dependent_plugins": {}

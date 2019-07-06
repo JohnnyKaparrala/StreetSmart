@@ -7,12 +7,12 @@
     <script type="text/javascript" src="cordova.js"></script>
     <script type="text/javascript">
     document.addEventListener("deviceready", function() {
-      var div = document.getElementById("map_canvas");
-
       if (cordova.platformId == 'android') {
-        StatusBar.backgroundColorByHexString("#1E88E5");
+        StatusBar.overlaysWebView(true);
+        StatusBar.backgroundColorByHexString('#33000000');
       }
 
+      var div = document.getElementById("map_canvas");
       // Create a Google Maps native view under the map_canvas div.
       var map = plugin.google.maps.Map.getMap(div, {
         'styles': [
@@ -240,10 +240,13 @@
       height: 100%;
       width: 100%;
       margin: 0;
+      padding-top: 44px;
+      padding-top: constant(safe-area-inset-top);
+      padding-top: env(safe-area-inset-top);
     }
 
     .main-color {
-      background-color: #1E88E5 !important;
+      background-color: rgb(71, 77, 82) !important;
     }
 
     .shadow-text {
@@ -255,17 +258,8 @@
   </head>
   <body>
     <div id="map_canvas">
-      <nav style="" class="row main-color">
-        <div class="col s2">
-          <a href="#" data-target="opcoes" class="sidenav-trigger"><i class="material-icons">menu</i></a>
-        </div>
-        <div class="col s10">
-          <div class="input-field">
-            <i class="material-icons prefix small">my_location</i>
-            <input  placeholder="Local"  id="icon_prefix" type="text" class="validate">
-          </div>
-        </div>
-      </nav>
+      <a href="#" data-target="opcoes" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+      
     </div>
 
     <ul id="opcoes" class="sidenav">
