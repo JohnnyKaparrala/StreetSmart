@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta name="viewport" content="width=device-width">
+    <meta name="viewport" content="width=device-width, viewport-fit=cover, initial-scale=1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script type="text/javascript" src="cordova.js"></script>
@@ -240,9 +240,6 @@
       height: 100%;
       width: 100%;
       margin: 0;
-      padding-top: 44px;
-      padding-top: constant(safe-area-inset-top);
-      padding-top: env(safe-area-inset-top);
     }
 
     .main-color {
@@ -253,14 +250,63 @@
       text-shadow: 4px 4px 4px rgba(0,0,0,0.25);
     }
 
+    #btn-menu {
+      position: fixed;
+      left: 0;
+      top: 0;
+      padding-top: constant(safe-area-inset-top);
+      padding-left: constant(safe-area-inset-left);
+    }
+
+    #menu-bottom {
+      position: fixed;
+      width: 100%;
+      left: 0;
+      bottom: 0;
+      margin: 0;
+    }
+
+    nav {
+      line-height: 14px !important;
+    }
+
+    nav a {
+      color: #555 !important;
+    }
+
+    nav ul a {
+      color: #555 !important;
+    }
+
+    i.material-icons {
+      display: block !important;
+      font-size: 24px !important;
+      height: 24px !important;
+      line-height: 24px !important;
+      text-align: center !important;
+    }
+
+    .btns-menu>li {
+      padding-top: 9px;
+    }
+
+    .btns-menu>li.active-btn>a, .btns-menu>li.active-btn>i {
+      color: dodgerblue !important;
+    }
+
+    .btns-menu>li>i, .btns-menu>li>a {
+      color: dodgerblue !important;
+      color: #777 !important;
+      font-weight: 600 !important; 
+      text-align: center !important;
+    }
     
     </style>
   </head>
-  <body>
+  <body class="">
     <div id="map_canvas">
-      <a href="#" data-target="opcoes" class="sidenav-trigger"><i class="material-icons">menu</i></a>
-      
     </div>
+    <div id="btn-menu"><a href="#" data-target="opcoes" class="sidenav-trigger"><i class="material-icons" style="font-weight: 700">menu</i></a></div>
 
     <ul id="opcoes" class="sidenav">
       <li><div class="user-view">
@@ -280,11 +326,15 @@
       <li><a href="#!"><i class="material-icons">info</i>Sobre</a></li>
     </ul>
 
-    <div class="fixed-action-btn modal-trigger" href="#filtros">
-      <a class="btn-floating btn-large main-color">
-        <i class="large material-icons shadow-text">filter_list</i>
-      </a>
-    </div>
+    <nav id="menu-bottom" >
+        <div class="nav-wrapper white">
+            <ul id="" class="btns-menu">
+              <li class="active-btn" style="width: 33%;"><i class="material-icons">location_on</i><a href="">Explorar</a></li>
+              <li style="width: 34%;"><i class="material-icons">map</i><a href="">Mapas</a></li>
+              <li style="width: 33%;"><i class="material-icons">filter_list</i><a class="modal-trigger" href="#filtros">Filtros</a></li>
+            </ul>
+          </div>
+      </nav>
 
     <div id="filtros" class="modal bottom-sheet" style="max-height: 90% !important">
       <div class="modal-content">
@@ -314,6 +364,13 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
   <script>
+  document.addEventListener("deviceready", onDeviceReady, false);
+
+  function onDeviceReady()
+  {
+    
+  }
+
   $(document).ready (function () {
     $('.fixed-action-btn').floatingActionButton();
     $('#opcoes').sidenav();

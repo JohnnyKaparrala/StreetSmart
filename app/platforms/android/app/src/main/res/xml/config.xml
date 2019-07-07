@@ -78,6 +78,6 @@
     <preference name="android-minSdkVersion" value="19" />
     <preference name="GOOGLE_MAPS_ANDROID_API_KEY" value="AIzaSyDn0gFwQ9wWVjFofAuxZVKh8-Pfqg_Y5yM" />
     <preference name="GOOGLE_MAPS_IOS_API_KEY" value="AIzaSyDn0gFwQ9wWVjFofAuxZVKh8-Pfqg_Y5yM" />
-    <preference name="NavigationBarBackgroundColor" value="#222222" />
-    <preference name="NavigationBarLight" value="false" />
+    <preference name="StatusBarBackgroundColor" value="#FAFAFA" />
+    <preference name="StatusBarStyle" value="lightcontent" />
 </widget>
