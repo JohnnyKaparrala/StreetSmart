@@ -244,12 +244,31 @@ cordova.define('cordova/plugin_list', function(require, exports, module) {
       "clobbers": [
         "window.NavigationBar"
       ]
+    },
+    {
+      "id": "cordova-plugin-nativegeocoder.NativeGeocoder",
+      "file": "plugins/cordova-plugin-nativegeocoder/www/NativeGeocoder.js",
+      "pluginId": "cordova-plugin-nativegeocoder",
+      "clobbers": [
+        "nativegeocoder"
+      ]
+    },
+    {
+      "id": "cordova-plugin-ionic-keyboard.keyboard",
+      "file": "plugins/cordova-plugin-ionic-keyboard/www/ios/keyboard.js",
+      "pluginId": "cordova-plugin-ionic-keyboard",
+      "clobbers": [
+        "window.Keyboard"
+      ]
     }
   ];
   module.exports.metadata = {
     "cordova-plugin-googlemaps": "2.6.2",
     "cordova-plugin-whitelist": "1.3.3",
     "cordova-plugin-statusbar": "2.4.2",
-    "cordova-plugin-navigationbar-color": "0.0.8"
+    "cordova-plugin-navigationbar-color": "0.0.8",
+    "cordova-plugin-add-swift-support": "2.0.2",
+    "cordova-plugin-nativegeocoder": "3.2.2",
+    "cordova-plugin-ionic-keyboard": "2.1.3"
   };
 });

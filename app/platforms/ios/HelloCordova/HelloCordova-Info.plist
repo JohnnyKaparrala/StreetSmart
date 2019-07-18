@@ -49,7 +49,7 @@
 		<true/>
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>This app wants to get your location while this app runs only.</string>
+	<string>Use geocoder service</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>This app wants to get your location always, even this app runs in background.</string>
 	<key>LSApplicationQueriesSchemes</key>

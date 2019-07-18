@@ -35,5 +35,29 @@
     },
     "is_top_level": true,
     "variables": {}
+  },
+  "cordova-plugin-nativegeocoder": {
+    "source": {
+      "type": "registry",
+      "id": "cordova-plugin-nativegeocoder@^3.2.2"
+    },
+    "is_top_level": true,
+    "variables": {}
+  },
+  "cordova-plugin-add-swift-support": {
+    "source": {
+      "type": "registry",
+      "id": "cordova-plugin-add-swift-support@2.0.2"
+    },
+    "is_top_level": false,
+    "variables": {}
+  },
+  "cordova-plugin-ionic-keyboard": {
+    "source": {
+      "type": "registry",
+      "id": "cordova-plugin-ionic-keyboard"
+    },
+    "is_top_level": true,
+    "variables": {}
   }
 }

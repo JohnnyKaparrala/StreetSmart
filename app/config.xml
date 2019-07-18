@@ -20,6 +20,7 @@
     <preference name="GOOGLE_MAPS_IOS_API_KEY" value="AIzaSyDn0gFwQ9wWVjFofAuxZVKh8-Pfqg_Y5yM" />
     <preference name="StatusBarBackgroundColor" value="#FAFAFA" />
     <preference name="StatusBarStyle" value="lightcontent" />
+    <preference name="KeyboardResizeMode" value="native" />
     <platform name="android">
         <allow-intent href="market:*" />
     </platform>

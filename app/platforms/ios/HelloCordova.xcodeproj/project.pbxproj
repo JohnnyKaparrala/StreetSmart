@@ -53,6 +53,9 @@
 		BE61DA5D0EAD40788CBE528B /* pgm_Localizable_da.json in Resources */ = {isa = PBXBuildFile; fileRef = E1B850E6F2D54B87B94B3023 /* pgm_Localizable_da.json */; };
 		DCD1F383AD114112B74A8488 /* pgm_Localizable_vi.json in Resources */ = {isa = PBXBuildFile; fileRef = 977B47D6E8FC41CE88FAFDDE /* pgm_Localizable_vi.json */; };
 		3A314B8CC77D465E965DE4F4 /* CDVStatusBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 91CD87C6769A428CACCFCDAC /* CDVStatusBar.m */; };
+		FB5342CA2624415E88323EF6 /* NativeGeocoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A78993C4A57542859443574E /* NativeGeocoder.swift */; };
+		7811F3FB3FF048F982DF21E5 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9AE6F6F5105F4C4293F12A3E /* CoreLocation.framework */; };
+		5A9412DCE1044F8E9BC56DE2 /* CDVIonicKeyboard.m in Sources */ = {isa = PBXBuildFile; fileRef = 524542684DDC41B686A46D8D /* CDVIonicKeyboard.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -168,6 +171,11 @@
 		977B47D6E8FC41CE88FAFDDE /* pgm_Localizable_vi.json */ = {isa = PBXFileReference; name = "pgm_Localizable_vi.json"; path = "pgm_Localizable_vi.json"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 		91CD87C6769A428CACCFCDAC /* CDVStatusBar.m */ = {isa = PBXFileReference; name = "CDVStatusBar.m"; path = "cordova-plugin-statusbar/CDVStatusBar.m"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; explicitFileType = undefined; includeInIndex = 0; };
 		F62F385FE96042AAA8743951 /* CDVStatusBar.h */ = {isa = PBXFileReference; name = "CDVStatusBar.h"; path = "cordova-plugin-statusbar/CDVStatusBar.h"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; explicitFileType = undefined; includeInIndex = 0; };
+		A78993C4A57542859443574E /* NativeGeocoder.swift */ = {isa = PBXFileReference; name = "NativeGeocoder.swift"; path = "cordova-plugin-nativegeocoder/NativeGeocoder.swift"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.swift; explicitFileType = undefined; includeInIndex = 0; };
+		73B08ADB8ED44141B99B92D7 /* NativeGeocoder-Bridging-Header.h */ = {isa = PBXFileReference; name = "NativeGeocoder-Bridging-Header.h"; path = "cordova-plugin-nativegeocoder/NativeGeocoder-Bridging-Header.h"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; explicitFileType = undefined; includeInIndex = 0; };
+		9AE6F6F5105F4C4293F12A3E /* CoreLocation.framework */ = {isa = PBXFileReference; name = "CoreLocation.framework"; path = "System/Library/Frameworks/CoreLocation.framework"; sourceTree = SDKROOT; fileEncoding = undefined; lastKnownFileType = wrapper.framework; explicitFileType = undefined; includeInIndex = 0; };
+		524542684DDC41B686A46D8D /* CDVIonicKeyboard.m */ = {isa = PBXFileReference; name = "CDVIonicKeyboard.m"; path = "cordova-plugin-ionic-keyboard/CDVIonicKeyboard.m"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; explicitFileType = undefined; includeInIndex = 0; };
+		0B8F3CD2DCE241338F8A7A43 /* CDVIonicKeyboard.h */ = {isa = PBXFileReference; name = "CDVIonicKeyboard.h"; path = "cordova-plugin-ionic-keyboard/CDVIonicKeyboard.h"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -176,6 +184,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				301BF552109A68D80062928A /* libCordova.a in Frameworks */,
+				7811F3FB3FF048F982DF21E5 /* CoreLocation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -260,6 +269,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				9AE6F6F5105F4C4293F12A3E /* CoreLocation.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -340,6 +350,10 @@
 				C27905FCF73E45FCBFF36866 /* IPluginProtocol.h */,
 				91CD87C6769A428CACCFCDAC /* CDVStatusBar.m */,
 				F62F385FE96042AAA8743951 /* CDVStatusBar.h */,
+				A78993C4A57542859443574E /* NativeGeocoder.swift */,
+				73B08ADB8ED44141B99B92D7 /* NativeGeocoder-Bridging-Header.h */,
+				524542684DDC41B686A46D8D /* CDVIonicKeyboard.m */,
+				0B8F3CD2DCE241338F8A7A43 /* CDVIonicKeyboard.h */,
 			);
 			name = Plugins;
 			path = "HelloCordova/Plugins";
@@ -504,6 +518,8 @@
 				2EB7D59A764A42E6BF2C27F1 /* PluginStreetViewPanoramaController.m in Sources */,
 				9B49252EE2BF4FC187B63016 /* PluginViewController.m in Sources */,
 				3A314B8CC77D465E965DE4F4 /* CDVStatusBar.m in Sources */,
+				FB5342CA2624415E88323EF6 /* NativeGeocoder.swift in Sources */,
+				5A9412DCE1044F8E9BC56DE2 /* CDVIonicKeyboard.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
