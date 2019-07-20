@@ -15,6 +15,10 @@
       $('#opcoes').sidenav();
       $('.modal').modal();
 
+      $('#menu-bottom').click((e) => {
+        
+      });
+
       let div = document.getElementById("map_canvas");
       // Create a Google Maps native view under the map_canvas div.
       let map = plugin.google.maps.Map.getMap(div, {
@@ -374,10 +378,10 @@
       <li><a href="#!"><i class="material-icons">info</i>Sobre</a></li>
     </ul>
 
-    <nav id="menu-bottom" >
-      <div class="nav-wrapper main-color" href="#filtros" class="modal-trigger">
-        <a style="position: fixed; margin-left: calc(-100% + 30px); font-weight: 900; font-size: x-large;">↑        </a>
-        <a data-target="filtros" class="sidenav-trigger">FILTROS</a>
+    <nav id="menu-bottom" class="modal-trigger" href="#filtros">
+      <div class="nav-wrapper main-color">
+        <a style="position: fixed; margin-left: calc(-100% + 56px); font-weight: 900; font-size: x-large;">↑        </a>
+        <a>FILTROS</a>
       </div>
     </nav>
 
