@@ -12,38 +12,14 @@
         StatusBar.overlaysWebView(true);
         StatusBar.backgroundColorByHexString('#33000000');
       }
+      $('#opcoes').sidenav();
+      $('.modal').modal();
 
       let div = document.getElementById("map_canvas");
       // Create a Google Maps native view under the map_canvas div.
       let map = plugin.google.maps.Map.getMap(div, {
         'styles': [
-          {
-            "featureType": "landscape.man_made",
-            "elementType": "geometry.fill",
-            "stylers": [
-              {
-                "color": "#f4f4f4"
-              }
-            ]
-          },
-          {
-            "featureType": "landscape.man_made",
-            "elementType": "geometry.stroke",
-            "stylers": [
-              {
-                "color": "#c5c5c5"
-              }
-            ]
-          },
-          {
-            "featureType": "landscape.natural",
-            "elementType": "geometry.fill",
-            "stylers": [
-              {
-                "color": "#d9f5d8"
-              }
-            ]
-          },
+          
           {
             "featureType": "poi",
             "stylers": [
@@ -58,18 +34,6 @@
             "stylers": [
               {
                 "saturation": -25
-              }
-            ]
-          },
-          {
-            "featureType": "poi",
-            "elementType": "labels.text",
-            "stylers": [
-              {
-                "saturation": -100
-              },
-              {
-                "visibility": "off"
               }
             ]
           },
@@ -104,59 +68,11 @@
             ]
           },
           {
-            "featureType": "poi.park",
-            "elementType": "geometry.fill",
-            "stylers": [
-              {
-                "color": "#c9f2c8"
-              },
-              {
-                "visibility": "on"
-              }
-            ]
-          },
-          {
-            "featureType": "road.arterial",
-            "elementType": "geometry.fill",
-            "stylers": [
-              {
-                "color": "#e9e8b6"
-              }
-            ]
-          },
-          {
-            "featureType": "road.arterial",
-            "elementType": "geometry.stroke",
-            "stylers": [
-              {
-                "color": "#d3cc3d"
-              }
-            ]
-          },
-          {
             "featureType": "road.arterial",
             "elementType": "labels.text",
             "stylers": [
               {
                 "visibility": "on"
-              }
-            ]
-          },
-          {
-            "featureType": "road.highway",
-            "elementType": "geometry.fill",
-            "stylers": [
-              {
-                "color": "#b0e4fd"
-              }
-            ]
-          },
-          {
-            "featureType": "road.highway",
-            "elementType": "geometry.stroke",
-            "stylers": [
-              {
-                "color": "#80b3ff"
               }
             ]
           },
@@ -170,45 +86,10 @@
             ]
           },
           {
-            "featureType": "road.local",
-            "elementType": "geometry.fill",
-            "stylers": [
-              {
-                "color": "#e1ecf7"
-              }
-            ]
-          },
-          {
-            "featureType": "road.local",
-            "elementType": "geometry.stroke",
-            "stylers": [
-              {
-                "color": "#c2d9ef"
-              }
-            ]
-          },
-          {
             "featureType": "transit",
             "stylers": [
               {
                 "visibility": "off"
-              }
-            ]
-          },
-          {
-            "featureType": "water",
-            "stylers": [
-              {
-                "color": "#1a87ff"
-              }
-            ]
-          },
-          {
-            "featureType": "water",
-            "elementType": "geometry.fill",
-            "stylers": [
-              {
-                "color": "#d5e9ff"
               }
             ]
           }
@@ -282,8 +163,8 @@
 
       });
 
-    function mapear (dir) {
-      $.getJSON( dir, function( data ) {
+    function mapear (dir_json, dir_img) {
+      $.getJSON( dir_json, function( data ) {
         $.each( data, function(key,value) {
           if (value.UF != "" && value.BAIRRO != "" && value.NUMERO != "" && value.LOGRADOURO !="" && value.CIDADE != "") {
             let endereco = "Brasil, " + value.UF + ", " + value.CIDADE + ", " + value.BAIRRO + ", " + value.LOGRADOURO + ", " + value.NUMERO;
@@ -292,9 +173,16 @@
               let firstResult = coordinates[0];
               map.addMarker({
                 position: {lat:firstResult.latitude, lng:firstResult.longitude},
-                title: value.RUBRICA
+                title: value.RUBRICA,
+                icon: {
+                    url: dir_img,
+                    size: {
+                      width: 56,
+                      height: 56
+                    }
+                  }
               });
-            }, () => {
+            }, (err) => {
               console.log(err);
             }, endereco, { });
           }
@@ -302,13 +190,24 @@
       });
     }
 
-      //mapear("./occurrences/occurrences.json");
+      mapear("./occurrences/occurrences.json", "./icons/arma.png");
       //mapear("./occurrences/roubo_celular_2019_5.json");
       //mapear("./occurrences/occurrences_feminicidio.json");
     }
 
     </script>
     <style type="text/css">
+    #filtros {
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+    }
+
+    #filtros > div > .titulo {
+      font-weight: 600;
+      font-size: 1.4em;
+      color: #222;
+    }
+
     #map_canvas_container {
       height: calc(100% - 56px);
       width: 100%;
@@ -317,6 +216,7 @@
     #map_canvas { 
       width: 100%;
       height: 100%;
+      
     }
     button {
       padding: .5em;
@@ -324,21 +224,21 @@
     }
 
     body, html {
-      height: 100%;
-      width: 100%;
+      height: 100vh;
+      width: 100vw;
       margin: 0;
       color: #555;
     }
 
     .main-color {
-      background-color: dodgerblue !important;
+      background-color: #282838 !important;
     }
     a {
       color: inherit;
     }
 
     .shadow-text {
-      text-shadow: 4px 4px 4px rgba(0,0,0,0.25);
+      text-shadow: 4px 4px 4px rgba(40,40,56,0.7);
     }
 
     #menu-top-container {
@@ -349,31 +249,6 @@
       width: 100%;
     }
 
-    #menu-top {
-      background-color: white;
-      height: 48px;
-      line-height: 48px;
-      vertical-align: middle;
-      width: 96%;
-      margin: 0 2%;
-      border-radius: 4px;
-      color: #444;
-      -webkit-box-shadow: 0 2px 2px 0 rgba(112, 112, 112, 0.14), 0 3px 1px -2px rgba(112, 112, 112, 0.12), 0 1px 5px 0 rgba(112, 112, 112, 0.2);
-      box-shadow: 0 2px 2px 0 rgba(112, 112, 112, 0.14), 0 3px 1px -2px rgba(112, 112, 112, 0.12), 0 1px 5px 0 rgba(112, 112, 112, 0.2);
-    }
-
-    #menu-top>div>a {
-      height: 48px!important;
-      line-height: 48px!important;
-      vertical-align: middle!important;
-    }
-    #menu-top>div>a>i.material-icons {
-      font-weight: 500 !important;
-      vertical-align: middle;
-      font-size: xx-large!important;
-      padding-left:4px; 
-    }
-
     #menu-bottom {
       width: 100%;
       left: 0;
@@ -382,38 +257,28 @@
       height: 56px;
     }
 
+    #menu-bottom > div {
+      line-height: 56px;
+      vertical-align: middle;
+      text-align: center;
+      box-shadow: 0 11px 23px 15px #282838;
+    }
+    
+    #menu-bottom > div > a {
+      letter-spacing: 1px;
+      font-weight: 500;
+      color: white;
+      text-align: center;
+      width: 100%;
+      margin: 0;
+    }
+
     nav {
       line-height: 14px !important;
     }
 
     nav a {
-      color: #555 !important;
-    }
-
-    nav ul a {
-      color: #555 !important;
-    }
-
-    .btns-menu>li>i {
-      display: block !important;
-      font-size: 24px !important;
-      height: 24px !important;
-      line-height: 24px !important;
-      text-align: center !important;
-    }
-
-    .btns-menu>li {
-      padding-top: 9px;
-    }
-
-    .btns-menu>li.active-btn>a, .btns-menu>li.active-btn>i {
-      color: dodgerblue !important;
-    }
-
-    .btns-menu>li>i, .btns-menu>li>a {
-      color: #777 !important;
-      font-weight: 500 !important; 
-      text-align: center !important;
+      color: #FFF !important;
     }
 
     input[type=text] {
@@ -434,26 +299,66 @@
       /*border: 4px solid dodgerblue;*/
       font-weight: 300;
     }
+
+    #menu-btn {
+      background-color: #282838;
+    }
+
+    #menu-btn-container {
+      position: fixed;
+      margin-top: 24px;
+      left: 23px;
+      right: inherit;
+      bottom: inherit;
+    }
+
+    #pesquisa-btn-container {
+      position: fixed;
+      margin-top: 24px;
+      right: 23px;
+      left: inherit;
+      bottom: inherit;
+      position: fixed;
+      padding-top: 15px;
+      margin-bottom: 0;
+      z-index: 997;
+    }
+
+    #pesquisa-btn {
+      background-color: rgba(93, 93, 93, 0.3);;
+      border: 2px solid white;
+    }
+
+    #pesquisa-btn > i{
+      margin-left: -2px;
+      margin-top: -2px;
+    }
+
     </style>
   </head>
   <!-- <div>Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/"     title="Flaticon">www.flaticon.com</a> messages.attribution.is_licensed_by <a href="http://creativecommons.org/licenses/by/3.0/"     title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div><div>Icons made by <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/"     title="Flaticon">www.flaticon.com</a> messages.attribution.is_licensed_by <a href="http://creativecommons.org/licenses/by/3.0/"     title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div><div>Icons made by <a href="https://www.flaticon.com/authors/smalllikeart" title="smalllikeart">smalllikeart</a> from <a href="https://www.flaticon.com/"     title="Flaticon">www.flaticon.com</a> messages.attribution.is_licensed_by <a href="http://creativecommons.org/licenses/by/3.0/"     title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div> -->
   <!-- <div>Icons made by <a href="https://www.flaticon.com/authors/pixel-buddha" title="Pixel Buddha">Pixel Buddha</a> from <a href="https://www.flaticon.com/"                 title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/"                 title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div> -->
-  <body class="app-android-safe-area">
+  <body class="">
+    <div id="menu-btn-container" class="fixed-action-btn sidenav-trigger" data-target="opcoes">
+      <a class="btn-floating btn-large" id="menu-btn">
+        <i class="large material-icons">menu</i>
+      </a>
+    </div>
+
+    <div id="pesquisa-btn-container" class="">
+      <a id="pesquisa-btn" class="btn-floating btn-large">
+        <i class="large material-icons">search</i>
+      </a>
+    </div>
+
     <div id="map_canvas_container">
       <div id="map_canvas">
       </div>
     </div>
-    <div id="menu-top-container">
-      <div id="menu-top" class="row">
-          <div class="col s2"><a href="#" data-target="opcoes" class="sidenav-trigger"><i class="material-icons">menu</i></a></div>
-          <div class="col s8"><input id="search_places" type="text" class="browser-default" placeholder="Pesquise aqui"></div>
-          <div class="col s2"><a href="#"><i class="material-icons" style="padding: 0 !important; font-size: x-large!important; font-weight: 500">keyboard_voice</i></a></div>
-      </div>
-    </div>
 
     <ul id="opcoes" class="sidenav">
-      <li><div class="user-view">
-          <div class="background">
+      <li style="padding-top: 38px"><div class="user-view">
+          <div class="background" >
             <img src="https://materializecss.com/images/office.jpg">
           </div>
           <a href="#user"><img class="circle" src="user.jpg"></a>
@@ -461,7 +366,7 @@
           <a href="#email"><span class="white-text email">jdandturk@gmail.com</span></a>
         </div>
       </li>
-      <li><a href="#!"><i class="material-icons">filter_list</i>Filtros</a></li>
+      <li><a href="#!"><i class="material-icons" style="font-weight: 500">filter_list</i>Filtros</a></li>
       <li><a href="#!"><i class="material-icons">satellite</i>Áreas em observação</a></li>
       <li><a href="#!"><i class="material-icons">map</i>Traçar uma rota</a></li>
       <li><div class="divider"></div></li>
@@ -470,24 +375,21 @@
     </ul>
 
     <nav id="menu-bottom" >
-      <div class="nav-wrapper white">
-        <ul id="" class="btns-menu">
-          <li class="active-btn" style="width: 33%;"><i class="material-icons">location_on</i><a href="">Explorar</a></li>
-          <li style="width: 34%;"><i class="material-icons">map</i><a href="">Mapas</a></li>
-          <li style="width: 33%;"><i class="material-icons">filter_list</i><a class="modal-trigger" href="#filtros">Filtros</a></li>
-        </ul>
+      <div class="nav-wrapper main-color" href="#filtros" class="modal-trigger">
+        <a style="position: fixed; margin-left: calc(-100% + 30px); font-weight: 900; font-size: x-large;">↑        </a>
+        <a data-target="filtros" class="sidenav-trigger">FILTROS</a>
       </div>
     </nav>
 
     <div id="filtros" class="modal bottom-sheet" style="max-height: 90% !important">
       <div class="modal-content">
-        <h4>Filtros</h4>
-        <br>
-        <h5>Tipos de crime</h5>
-        <br>
-        <h5>Tipos de mapa</h5>
-        <br>
-        <h5>Período</h5>
+        <span class="titulo">Filtros</span>
+        <br><br>
+        <span class="titulo">Tipos de crime</span>
+        <br><br><br><br>
+        <span class="titulo">Tipos de mapa</span>
+        <br><br><br><br>
+        <span class="titulo">Período</span>
         <div class="grey-text row">
           <div class="input-field col s6">
               <input id="de" type="text" class="datepicker">
@@ -506,20 +408,4 @@
   </body>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-  <script>
-  document.addEventListener("deviceready", onDeviceReady, false);
-
-  function onDeviceReady()
-  {
-    
-  }
-
-  $(document).ready (function () {
-    $('.fixed-action-btn').floatingActionButton();
-    $('#opcoes').sidenav();
-    $('.modal').modal();
-    $('.datepicker').datepicker();
-    $('.carousel').carousel();
-  })
-  </script>
 </html>
