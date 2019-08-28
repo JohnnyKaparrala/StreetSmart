@@ -78,6 +78,12 @@ cordova.define('cordova/plugin_list', function(require, exports, module) {
       "runs": true
     },
     {
+      "id": "cordova-plugin-googlemaps.Heatmap",
+      "file": "plugins/cordova-plugin-googlemaps/www/Heatmap.js",
+      "pluginId": "cordova-plugin-googlemaps",
+      "runs": true
+    },
+    {
       "id": "cordova-plugin-googlemaps.TileOverlay",
       "file": "plugins/cordova-plugin-googlemaps/www/TileOverlay.js",
       "pluginId": "cordova-plugin-googlemaps",
@@ -230,19 +236,11 @@ cordova.define('cordova/plugin_list', function(require, exports, module) {
       "runs": true
     },
     {
-      "id": "cordova-plugin-statusbar.statusbar",
-      "file": "plugins/cordova-plugin-statusbar/www/statusbar.js",
-      "pluginId": "cordova-plugin-statusbar",
+      "id": "cordova-plugin-ionic-keyboard.keyboard",
+      "file": "plugins/cordova-plugin-ionic-keyboard/www/android/keyboard.js",
+      "pluginId": "cordova-plugin-ionic-keyboard",
       "clobbers": [
-        "window.StatusBar"
-      ]
-    },
-    {
-      "id": "cordova-plugin-navigationbar-color.navigationbar",
-      "file": "plugins/cordova-plugin-navigationbar-color/www/navigationbar.js",
-      "pluginId": "cordova-plugin-navigationbar-color",
-      "clobbers": [
-        "window.NavigationBar"
+        "window.Keyboard"
       ]
     },
     {
@@ -254,20 +252,29 @@ cordova.define('cordova/plugin_list', function(require, exports, module) {
       ]
     },
     {
-      "id": "cordova-plugin-ionic-keyboard.keyboard",
-      "file": "plugins/cordova-plugin-ionic-keyboard/www/android/keyboard.js",
-      "pluginId": "cordova-plugin-ionic-keyboard",
+      "id": "cordova-plugin-navigationbar-color.navigationbar",
+      "file": "plugins/cordova-plugin-navigationbar-color/www/navigationbar.js",
+      "pluginId": "cordova-plugin-navigationbar-color",
       "clobbers": [
-        "window.Keyboard"
+        "window.NavigationBar"
+      ]
+    },
+    {
+      "id": "cordova-plugin-statusbar.statusbar",
+      "file": "plugins/cordova-plugin-statusbar/www/statusbar.js",
+      "pluginId": "cordova-plugin-statusbar",
+      "clobbers": [
+        "window.StatusBar"
       ]
     }
   ];
   module.exports.metadata = {
+    "cordova-plugin-add-swift-support": "2.0.2",
     "cordova-plugin-googlemaps": "2.6.2",
-    "cordova-plugin-whitelist": "1.3.3",
-    "cordova-plugin-statusbar": "2.4.2",
-    "cordova-plugin-navigationbar-color": "0.0.8",
+    "cordova-plugin-ionic-keyboard": "2.1.3",
     "cordova-plugin-nativegeocoder": "3.2.2",
-    "cordova-plugin-ionic-keyboard": "2.1.3"
+    "cordova-plugin-navigationbar-color": "0.0.8",
+    "cordova-plugin-statusbar": "2.4.2",
+    "cordova-plugin-whitelist": "1.3.3"
   };
 });

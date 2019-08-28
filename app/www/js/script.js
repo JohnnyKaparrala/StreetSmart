@@ -219,7 +219,7 @@ function setVar (key, value) {
 
     function mapear (dir_json, dir_img) {
         $.getJSON( dir_json, function( data ) {
-            //var heatmapData = [];
+            var heatmapData = [];
             $.each( data, function(key,value) {
                 if (value.LATITUDE != "") {
                     //MARKERS
@@ -236,14 +236,15 @@ function setVar (key, value) {
                     });*/
 
                     //HEATMAP
-                    map.addCircle({
+                    
+                    /*map.addCircle({
                         center: {lat:parseFloat(value.LATITUDE.replace(",",".")), lng:parseFloat(value.LONGITUDE.replace(",","."))},
                         radius: 70,
                         fillColor: "rgba(255, 0, 0, 0.3)",
                         strokeColor: "rgba(255, 100, 0, 0.2)",
                         strokeWidth: 10
-                    });
-                    //heatmapData.push(new google.maps.LatLng(value.LATITUDE, value.LONGITUDE));
+                    });*/
+                    heatmapData.push(parseFloat(value.LATITUDE.replace(",",".")), parseFloat(value.LONGITUDE.replace(",",".")));
                     //console.log("Com coordenadas");
                     //console.log(value.LATITUDE + " " + value.LONGITUDE);
                 }
@@ -277,6 +278,9 @@ function setVar (key, value) {
                 }*/
             });
 
+            map.addHeatmap({
+              data: heatmapData
+            });
             /*var heatmap = new google.maps.visualization.HeatmapLayer({
                 data: heatmapData,
                 map: map

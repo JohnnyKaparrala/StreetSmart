@@ -19,7 +19,8 @@ var utils = require('cordova/utils'),
   GroundOverlay = require('./GroundOverlay'),
   KmlOverlay = require('./KmlOverlay'),
   KmlLoader = require('./KmlLoader'),
-  MarkerCluster = require('./MarkerCluster');
+  MarkerCluster = require('./MarkerCluster'),
+  Heatmap = require('./Heatmap');
 
 /**
  * Google Maps model.
@@ -1297,6 +1298,36 @@ Map.prototype.addCircle = function(circleOptions, callback) {
 };
 
 //-------------
+// Heatmap
+//-------------
+Map.prototype.addHeatmap = function(heatmapOptions, callback) {
+  var self = this;
+  heatmapOptions.visible = common.defaultTrueOption(heatmapOptions.visible);
+  heatmapOptions.zIndex = heatmapOptions.zIndex || 0;
+  heatmapOptions.data = 'data' in heatmapOptions ? heatmapOptions.data : [];
+
+  var heatmap = new Heatmap(self, heatmapOptions, exec);
+  var heatmapId = heatmap.getId();
+  self.OVERLAYS[heatmapId] = heatmap;
+  heatmap.one(heatmapId + '_remove', function() {
+    heatmap.remove();
+    delete self.OVERLAYS[heatmapId];
+    heatmap = undefined;
+  });
+
+  self.exec.call(self, function() {
+    heatmap._privateInitialize();
+    delete heatmap._privateInitialize;
+
+    if (typeof callback === 'function') {
+      callback.call(self, heatmap);
+    }
+  }, self.errorHandler, self.__pgmId, 'loadPlugin', ['Heatmap', heatmapOptions, heatmap.hashCode]);
+
+  return heatmap;
+};
+
+//-------------
 // Marker
 //-------------
 
@@ -1305,7 +1336,7 @@ Map.prototype.addMarker = function(markerOptions, callback) {
   markerOptions = common.markerOptionsFilter(markerOptions);
 
   //------------------------------------
-  // Generate a makrer instance at once.
+  // Generate a marker instance at once.
   //------------------------------------
   markerOptions.icon = markerOptions.icon || {};
   if (typeof markerOptions.icon === 'string' || Array.isArray(markerOptions.icon)) {
