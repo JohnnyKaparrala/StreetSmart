@@ -1305,6 +1305,7 @@ Map.prototype.addHeatmap = function(heatmapOptions, callback) {
   heatmapOptions.zIndex = heatmapOptions.zIndex || 0;
   heatmapOptions.data = 'data' in heatmapOptions ? heatmapOptions.data : [];
 
+  //console.log(heatmapOptions);
   var heatmap = new Heatmap(self, heatmapOptions, exec);
   var heatmapId = heatmap.getId();
   self.OVERLAYS[heatmapId] = heatmap;

@@ -244,7 +244,9 @@ function setVar (key, value) {
                         strokeColor: "rgba(255, 100, 0, 0.2)",
                         strokeWidth: 10
                     });*/
-                    heatmapData.push(parseFloat(value.LATITUDE.replace(",",".")), parseFloat(value.LONGITUDE.replace(",",".")));
+                    //console.log(value.LATITUDE.replace(",","."))
+                    //console.log([parseFloat(value.LATITUDE.replace(",",".")), parseFloat(value.LONGITUDE.replace(",","."))])
+                    heatmapData.push([parseFloat(value.LATITUDE.replace(",",".")), parseFloat(value.LONGITUDE.replace(",","."))]);
                     //console.log("Com coordenadas");
                     //console.log(value.LATITUDE + " " + value.LONGITUDE);
                 }
@@ -278,6 +280,7 @@ function setVar (key, value) {
                 }*/
             });
 
+            console.log(heatmapData);
             map.addHeatmap({
               data: heatmapData
             });
