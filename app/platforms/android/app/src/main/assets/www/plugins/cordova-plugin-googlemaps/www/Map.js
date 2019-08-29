@@ -1306,6 +1306,7 @@ Map.prototype.addHeatmap = function(heatmapOptions, callback) {
   heatmapOptions.zIndex = heatmapOptions.zIndex || 0;
   heatmapOptions.data = 'data' in heatmapOptions ? heatmapOptions.data : [];
 
+  //console.log(heatmapOptions);
   var heatmap = new Heatmap(self, heatmapOptions, exec);
   var heatmapId = heatmap.getId();
   self.OVERLAYS[heatmapId] = heatmap;
@@ -1315,7 +1316,7 @@ Map.prototype.addHeatmap = function(heatmapOptions, callback) {
     heatmap = undefined;
   });
 
-  self.exec.call(self, function() {
+  var result = self.exec.call(self, function() {
     heatmap._privateInitialize();
     delete heatmap._privateInitialize;
 
@@ -1324,6 +1325,7 @@ Map.prototype.addHeatmap = function(heatmapOptions, callback) {
     }
   }, self.errorHandler, self.__pgmId, 'loadPlugin', ['Heatmap', heatmapOptions, heatmap.hashCode]);
 
+  console.log(result);
   return heatmap;
 };
 

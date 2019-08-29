@@ -6,6 +6,7 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.google.maps.android.heatmaps.WeightedLatLng;
 import com.google.maps.android.heatmaps.HeatmapTileProvider;
+//import com.google.maps.android.heatmaps.HeatmapTileProvider.Builder;
 import org.apache.cordova.CallbackContext;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -47,11 +48,11 @@ private String heatmapHashCode;
     }
     if (opts.has("strokeWidth")) {
       heatmapOptions.strokeWidth((int)(opts.getDouble("strokeWidth") * density));
-    }*/
+    }
     if (opts.has("visible")) {
       heatmapOptions.visible(opts.getBoolean("visible"));
     }
-    /*if (opts.has("zIndex")) {
+    if (opts.has("zIndex")) {
       heatmapOptions.zIndex(opts.getInt("zIndex"));
     }
     if (opts.has("clickable")) {
@@ -69,16 +70,82 @@ cordova.getActivity().runOnUiThread(new Runnable() {
         LinkedList<WeightedLatLng> data_points = new LinkedList<WeightedLatLng>();
         
         try {
+          int entries_with_error = 0;
+          int entries_with_error_in_weight = 0;
           for (int i = 0; i < data.length(); i++) {
             JSONArray coord = data.getJSONArray(i);
 
-            double lat = coord.getDouble(0);
-            double lon = coord.getDouble(1);
+            double lat = 0.;
+            double lon = 0.;
 
-            data_points.add(new WeightedLatLng(new LatLng(lat, lon), 1.));
+            try {
+              lat = coord.getDouble(0);
+              lon = coord.getDouble(1);
+            }
+            catch (JSONException je) {
+              entries_with_error++;
+              continue;
+            }
+
+            double weight = 1.;
+            if (coord.length() == 3)
+              try {
+                weight = coord.getDouble(2);
+              }
+              catch (JSONException je) {
+                weight = 1.;
+                entries_with_error_in_weight++;
+              }
+
+            data_points.add(new WeightedLatLng(new LatLng(lat, lon), weight));
           }
 
-          HeatmapTileProvider heatmap = new HeatmapTileProvider.Builder().weightedData(data_points).build();
+          if (entries_with_error > 0) {
+            callbackContext.error("Error while parsing latitude or longitude doubles from " + new Integer(entries_with_error).toString() + " entries.");
+          }
+          if (entries_with_error_in_weight > 0) {
+            callbackContext.error("Error while parsing weight double from " + new Integer(entries_with_error_in_weight).toString() + " entries.");
+          }
+
+          HeatmapTileProvider.Builder heatmap_builder = new HeatmapTileProvider.Builder();
+
+          if (opts.has("radius")) {
+            int radius = 20;
+            try {
+              radius = opts.getInt("radius");
+
+              if (radius < 10 || radius > 50) {
+                radius = 20;
+                callbackContext.error("Radius out of range. Radius must be between 10 and 50.");
+              }
+              
+            } catch (JSONException je) {
+              radius = 20;
+              je.printStackTrace();
+              callbackContext.error(je.getMessage() + "\nError while parsing integer radius.");
+            }
+            heatmap_builder = heatmap_builder.radius(radius);
+          }
+          if (opts.has("opacity")) {
+            double opacity = 0.7;
+
+            try {
+              opacity = opts.getDouble("opacity");
+
+              if (opacity < 0. || opacity > 1.) {
+                opacity = 0.7;
+                callbackContext.error("Opacity out of range. Raius must be between 0 and 1.");
+              }
+            } catch (JSONException je) {
+              opacity = 0.7;
+              je.printStackTrace();
+              callbackContext.error(je.getMessage() + "\nError while parsing double opacity.");
+            }
+            
+            heatmap_builder = heatmap_builder.opacity(opacity);
+          }
+
+          HeatmapTileProvider heatmap = heatmap_builder.weightedData(data_points).build();
           TileOverlay heatmapTileOverlay = map.addTileOverlay(new TileOverlayOptions().tileProvider(heatmap));
           pluginMap.objects.put("heatmap_" + heatmapHashCode, heatmap);
           pluginMap.objects.put("heatmapTileOverlay_" + heatmapHashCode, heatmapTileOverlay);

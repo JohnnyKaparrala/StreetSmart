@@ -1315,7 +1315,7 @@ Map.prototype.addHeatmap = function(heatmapOptions, callback) {
     heatmap = undefined;
   });
 
-  self.exec.call(self, function() {
+  var result = self.exec.call(self, function() {
     heatmap._privateInitialize();
     delete heatmap._privateInitialize;
 
@@ -1324,6 +1324,7 @@ Map.prototype.addHeatmap = function(heatmapOptions, callback) {
     }
   }, self.errorHandler, self.__pgmId, 'loadPlugin', ['Heatmap', heatmapOptions, heatmap.hashCode]);
 
+  console.log(result);
   return heatmap;
 };
 

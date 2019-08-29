@@ -7,18 +7,20 @@ function setVar (key, value) {
       StatusBar.backgroundColorByHexString('#33000000');
     }
     $('#opcoes').sidenav({
-      onOpenStart: () => {
+      onOpenStart: function() {
       setVar('state','side_menu');
-    }, onCloseEnd: () => {
-      setVar('state','home');}});
-
+    }, 
+    onCloseEnd: function() {
+      setVar('state','home');
+    }
+    });
     $('#filtros').modal({
-      onOpenStart: () => {
+      onOpenStart: function() {
       setVar('state','filtros');
-    }, onCloseEnd: () => {
+    }, onCloseEnd: function() {
       setVar('state','home');}});
     
-    $('#pesquisa-btn-container').click((e) => {
+    $('#pesquisa-btn-container').click(function(e) {
       $("#pesquisa-text-container").fadeIn(100);
       $("#pesquisa-text-container").css({width: (($(window).width()-40) + "px"),right:"20px"});
       $("#pesquisa-input").delay(500).fadeIn(100);
@@ -28,7 +30,7 @@ function setVar (key, value) {
       $("#pesquisa-btn-container").css({display:"none"});
     }); //onclick="setVar('state','side_menu');"
 
-    $('#close-btn').click((e) => {
+    $('#close-btn').click(function(e) {
       $("#search_places").val("");
       $("#search_places").focus();
     });
@@ -36,7 +38,7 @@ function setVar (key, value) {
     document.addEventListener("backbutton", onBackKeyDown, false);
 
     function onBackKeyDown() {
-      let page_state = window.localStorage.getItem("state");
+      var page_state = window.localStorage.getItem("state");
       switch (page_state) {
         case "search": {
           $("#pesquisa-input").fadeOut(100);
@@ -68,9 +70,9 @@ function setVar (key, value) {
       }
     }
 
-    let div = document.getElementById("map_canvas");
+    var div = document.getElementById("map_canvas");
     // Create a Google Maps native view under the map_canvas div.
-    let map = plugin.google.maps.Map.getMap(div, {
+    var map = plugin.google.maps.Map.getMap(div, {
       'styles': [
         
         {
@@ -158,7 +160,7 @@ function setVar (key, value) {
       },
     });
     
-    window.addEventListener('keyboardDidHide', () => {
+    window.addEventListener('keyboardDidHide', function() {
       $(':text').blur();
     });
 
@@ -184,7 +186,7 @@ function setVar (key, value) {
    
     $("#search_places").on("keypress", function(event){   
       if (event.which  == 13) {
-        let place_to_go = $("#search_places").val();
+        var place_to_go = $("#search_places").val();
         gotoPlace(place_to_go);
         Keyboard.hide();
         event.preventDefault();
@@ -204,7 +206,7 @@ function setVar (key, value) {
       duration: 0
     }, function() {
     });
-    /*map.getMyLocation((location) => {
+    /*map.getMyLocation(function(location) {
       map.animateCamera({
         target: location.latLng,
         zoom: 13,
@@ -213,7 +215,7 @@ function setVar (key, value) {
         duration: 1000
       }, function() {
       });
-    }, () => {
+    }, function() {
 
     });*/
 
@@ -246,7 +248,7 @@ function setVar (key, value) {
                     });*/
                     //console.log(value.LATITUDE.replace(",","."))
                     //console.log([parseFloat(value.LATITUDE.replace(",",".")), parseFloat(value.LONGITUDE.replace(",","."))])
-                    heatmapData.push([parseFloat(value.LATITUDE.replace(",",".")), parseFloat(value.LONGITUDE.replace(",","."))]);
+                    heatmapData.push([parseFloat(value.LATITUDE.replace(",",".")), parseFloat(value.LONGITUDE.replace(",",".")), 5]);
                     //console.log("Com coordenadas");
                     //console.log(value.LATITUDE + " " + value.LONGITUDE);
                 }
@@ -256,13 +258,13 @@ function setVar (key, value) {
                 }
 
                 /*if (value.UF != "" && value.BAIRRO != "" && value.NUMERO != "" && value.LOGRADOURO !="" && value.CIDADE != "") {
-                    //let endereco = "Brasil, " + value.UF + ", " + value.CIDADE + ", " + value.BAIRRO + ", " + value.LOGRADOURO + ", " + value.NUMERO;
+                    //var endereco = "Brasil, " + value.UF + ", " + value.CIDADE + ", " + value.BAIRRO + ", " + value.LOGRADOURO + ", " + value.NUMERO;
                     //alert(endereco);
 
                     
 
-                    *//*nativegeocoder.forwardGeocode((coordinates) => {
-                        let firstResult = coordinates[0];
+                    *//*nativegeocoder.forwardGeocode(function(coordinates) {
+                        var firstResult = coordinates[0];
                         map.addMarker({
                         position: {lat:firstResult.latitude, lng:firstResult.longitude},
                         title: value.RUBRICA,
@@ -274,7 +276,7 @@ function setVar (key, value) {
                             }
                             }
                         });
-                    }, (err) => {
+                    }, function(err) {
                         console.log(err);
                     }, endereco, { });*//*
                 }*/
@@ -282,7 +284,8 @@ function setVar (key, value) {
 
             console.log(heatmapData);
             map.addHeatmap({
-              data: heatmapData
+              data: heatmapData,
+              radius: 20
             });
             /*var heatmap = new google.maps.visualization.HeatmapLayer({
                 data: heatmapData,
