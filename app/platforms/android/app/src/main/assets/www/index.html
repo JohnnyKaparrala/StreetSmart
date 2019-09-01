@@ -65,6 +65,23 @@
 
     <div id="filtros" class="modal bottom-sheet" style="max-height: 90% !important">
       <div class="modal-content">
+        <span class="titulo">Estilo de visualização</span>
+        <form>
+          <p onclick="to_marker();">
+            <label>
+              <input class="with-gap" name="tipo_viz" type="radio" checked />
+              <span>Padrão</span>
+            </label>
+          </p>
+          <p onclick="to_heatmap();;">
+            <label>
+              <input class="with-gap" name="tipo_viz" type="radio" />
+              <span>Mapa de calor</span>
+            </label>
+          </p>
+          <p>
+        </form>
+        <br><br>
         <span class="titulo">Filtros</span>
         <br><br>
         <span class="titulo">Tipos de crime</span>
