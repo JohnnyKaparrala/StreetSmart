@@ -1,0 +1,99 @@
+app/hooks
+app/platforms
+
+# Cordova Global
+app/plugins/
+
+# iOS Platform
+app/platforms/ios/build/
+app/platforms/ios/www/
+app/platforms/ios/cordova/console.log
+*.xcuserdatad
+
+# Android Platform
+app/platforms/android/.gradle
+app/platforms/android/build
+app/platforms/android/assets/www
+app/platforms/android/local.properties
+app/platforms/android/CordovaLib/build
+app/platforms/android/CordovaLib/gen
+app/platforms/android/CordovaLib/local.properties
+app/platforms/android/app
+
+# wp8
+app/platforms/wp8/bin
+app/platforms/wp8/obj
+app/platforms/wp8/www
+app/platforms/wp8/.staging
+app/platforms/wp8/*.suo
+app/platforms/wp8/*.csproj.user
+
+# Windows Universal App (Windows Platform)
+app/platforms/windows/build
+app/platforms/windows/www
+app/platforms/windows/AppPackages
+
+# Browser
+app/platforms/browser/www
+
+# res
+app/resources/signing
+
+# Node JS + TS
+app/logs
+*.log
+app/npm-debug.log*
+app/yarn-debug.log*
+app/yarn-error.log*
+app/pids
+*.pid
+*.seed
+*.pid.lock
+app/lib-cov
+app/coverage
+app/.nyc_output
+app/.grunt
+app/bower_components
+app/.lock-wscript
+app/build/Release
+app/dist/
+app/node_modules/
+app/jspm_packages/
+app/typings/
+app/.npm
+app/.eslintcache
+app/.node_repl_history
+*.tgz
+app/.yarn-integrity
+app/.env
+app/.env.test
+app/.cache
+app/.next
+app/.nuxt
+app/.vuepress/dist
+app/.serverless/
+app/.fusebox/
+app/.dynamodb/
+
+# Mac
+app/.DS_Store
+app/.AppleDouble
+app/.LSOverride
+app/.DocumentRevisions-V100
+app/.fseventsd
+app/.Spotlight-V100
+app/.TemporaryItems
+app/.Trashes
+app/.VolumeIcon.icns
+app/.com.apple.timemachine.donotpresent
+app/.AppleDB
+app/.AppleDesktop
+app/.apdisk
+
+# Windows
+app/ehthumbs.db
+app/ehthumbs_vista.db
+*.stackdump
+app/[Dd]esktop.ini
+app/$RECYCLE.BIN/
+*.lnk

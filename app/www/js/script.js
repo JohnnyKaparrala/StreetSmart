@@ -210,7 +210,7 @@ const LATROCINIO = {id: 4, path_img: "./icons/arma.png"};
 const LESAO_CORPORAL_SEGUIDA_DE_MORTE = {id: 5, path_img: "./icons/arma.png"};
 const HOMICIDIO_DOLOSO = {id: 6, path_img: "./icons/arma.png"};
 
-let occurrences_jsons = new Array ();
+var occurrences_jsons = new Array ();
 
 function to_marker() {
   map_global.clear();
