@@ -544,15 +544,45 @@ var delta_function = function (zoom) {
   return 353.3062702684 * Math.exp(-0.6760301423 * zoom);
 }
 
+var previous_camera_position;
+var previous_delta;
+var dist = 0.6;
+var zoom_change = 0.05;
 function onMapInit (map) {
   map.on(plugin.google.maps.event.CAMERA_MOVE_END, function(cameraPosition) {
     var delta = delta_function(cameraPosition.zoom);
+
+    var moved_camera_considerably = true;
+    var changed_zoom_considerably = true;
+    if (previous_camera_position)
+    {
+      var d_y = (previous_camera_position.target.lat - cameraPosition.target.lat);
+      var d_x = (previous_camera_position.target.lng - cameraPosition.target.lng);
+      var distance = Math.sqrt(d_x * d_x + d_y * d_y);
+
+      //console.log("distance/delta: " + (distance/delta));
+      
+      moved_camera_considerably = ((distance/delta) > dist);
+    }
+    if (previous_delta) {
+      //console.log("delta difference: " + (Math.abs(delta - previous_delta)));
+      changed_zoom_considerably = (Math.abs(delta - previous_delta) > zoom_change);
+    }
+
+    //console.log("moved_camera_considerably: " + moved_camera_considerably + "; changed_zoom_considerably: " + changed_zoom_considerably);
+    if (!moved_camera_considerably && !changed_zoom_considerably)
+      return;
+
+    previous_camera_position = cameraPosition;
+    previous_delta = delta;
+
     //console.log("zoom: " + cameraPosition.zoom);
     console.log("delta: " + delta);
 
     if (delta <= 0.1)
       getOccurrencesWithinRectangle(cameraPosition.target.lng + delta, cameraPosition.target.lng - delta, cameraPosition.target.lat + delta, cameraPosition.target.lat - delta);
-
+    else
+      M.toast({html: 'Aumente o zoom para ver as occorrências de uma região.'});
     /*map_global.addMarker({
       position: {lat:cameraPosition.target.lat + delta, lng:cameraPosition.target.lng + delta},
       title: "Test upper right limit of view rectangle",
@@ -579,6 +609,10 @@ function onMapInit (map) {
       }
     });*/
   });
+
+  /*map.on(plugin.google.maps.event.CAMERA_MOVE_START, function(cameraPosition) {
+    previous_camera_position = cameraPosition;
+  });*/
 
   map.animateCamera({
     target: {lat:-22.9064, lng:-47.0616 },
