@@ -541,7 +541,7 @@ function insert_json_in_db (dir_json) {
 //mapear_marker("./occurrences/DadosBO_2019_7(ROUBO DE CELULAR).csv_unique.csv.json", ROUBO_CELULAR);
 
 var delta_function = function (zoom) {
-  return 353.3062702684 * Math.exp(-0.6760301423 * zoom);
+  return 353.306270268435128 * Math.exp(-0.676030142340657 * zoom);
 }
 
 var previous_camera_position;
