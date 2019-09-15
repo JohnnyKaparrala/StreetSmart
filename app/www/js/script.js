@@ -6,79 +6,6 @@ var map_global;
 var db;
 
 document.addEventListener("deviceready", function() {
-  /*function open_occurrences_table_fn (db) {
-    db.transaction(function (tx) {
-      tx.executeSql(
-        "CREATE TABLE Occurrences ( \
-        ID INTEGER PRIMARY KEY, \
-        BO_YEAR INTEGER NOT NULL, \
-        BO_NUMBER INTEGER NOT NULL, \
-        BO_BEGIN_TIME TEXT NOT NULL, \
-        BO_EMISSION_TIME TEXT NOT NULL, \
-        DATE TEXT NOT NULL, \
-        PERIOD CHAR NOT NULL, \
-        COMUNICATION_DATE TEXT NOT NULL, \
-        ELABORATION_DATE TEXT NOT NULL, \
-        BO_AUTHORSHIP CHAR NOT NULL, \
-        IS_FLAGRANT BOOL NOT NULL, \
-        ADDRESS_STREET TEXT NOT NULL, \
-        ADDRESS_NUMBER INTEGER NOT NULL, \
-        ADDRESS_DISTRICT TEXT NOT NULL, \
-        ADDRESS_CITY TEXT NOT NULL, \
-        ADDRESS_STATE TEXT NOT NULL, \
-        LATITUDE REAL NOT NULL, \
-        LONGITUDE REAL NOT NULL, \
-        PLACE_DESCRIPTION TEXT NOT NULL, \
-        EXAM TEXT, \
-        SOLUTION TEXT NOT NULL, \
-        POLICE_STATION_NAME TEXT NOT NULL, \
-        POLICE_STATION_CIRCUMSCRIPTION TEXT NOT NULL, \
-        SPECIES TEXT NOT NULL, \
-        RUBRIC TEXT NOT NULL, \
-        UNFOLDING TEXT, \
-        STATUS CHAR NOT NULL, \
-        PERSON_NAME TEXT, \
-        PERSON_TYPE TEXT, \
-        FATAL_VICTIM BOOL, \
-        PERSON_RG TEXT, \
-        PERSON_RG_STATE TEXT, \
-        PERSON_NATURALNESS TEXT, \
-        PERSON_NACIONALITY TEXT, \
-        PERSON_SEX TEXT, \
-        PERSON_DATE_OF_BIRTH TEXT, \
-        PERSON_AGE INTEGER, \
-        PERSON_CIVIL_STATE TEXT, \
-        PERSON_JOB TEXT, \
-        PERSON_INSTRUCTION_DEGREE TEXT, \
-        PERSON_SKIN_COLOR TEXT, \
-        LINKED_NATURE TEXT, \
-        LINK_TYPE TEXT, \
-        RELATIONSHIP TEXT, \
-        KINSHIP TEXT, \
-        VEHICLE_PLATE TEXT, \
-        VEHICLE_STATE TEXT, \
-        VEHICLE_CITY TEXT, \
-        VEHICLE_DESCRIBED_COLOR TEXT, \
-        VEHICLE_DESCRIBED_MODEL TEXT, \
-        VEHICLE_FABRICATION_YEAR INTEGER, \
-        VEHICLE_MODEL_YEAR INTEGER, \
-        VEHICLE_DESCRIBED_TYPE TEXT, \
-        PHONES_QUANTITY INTEGER, \
-        PHONE_BRAND TEXT, \
-        UNIQUE (BO_YEAR, BO_NUMBER, POLICE_STATION_NAME)
-        ); \
-        CREATE VIRTUAL TABLE occurrences_index USING rtree( \
-          ID INTEGER PRIMARY KEY, \
-          minLng, maxLng, \
-          minLat, maxLat \
-        );");
-  }, function (error) {
-      console.log('transaction error: ' + error.message);
-  }, function () {
-      console.log('transaction ok');
-  });
-  };*/
-
   if (cordova.platformId == 'android') {
     StatusBar.overlaysWebView(true);
     StatusBar.backgroundColorByHexString('#33000000');
@@ -221,29 +148,63 @@ const ROUBO_VEICULOS = {id: 3, path_img: "./icons/arma.png"};
 const LATROCINIO = {id: 4, path_img: "./icons/arma.png"};
 const LESAO_CORPORAL_SEGUIDA_DE_MORTE = {id: 5, path_img: "./icons/arma.png"};
 const HOMICIDIO_DOLOSO = {id: 6, path_img: "./icons/arma.png"};
+const MARKERS_STATE = 0;
+const HEATMAP_STATE = 1;
 
 var occurrences_jsons = new Array ();
+var map_state = MARKERS_STATE;
+var occurrences_within_view = [];
 
-function to_marker() {
+function to_marker(/*use_json_or_result_set*/) {
+  //use_json_or_result_set = (typeof use_json_or_result_set !== 'undefined' ? use_json_or_result_set : true);
+  map_state = MARKERS_STATE;
   map_global.clear();
 
-  $.each( occurrences_jsons, function(key,value) {
-    mapear_marker(value.dir_json, value.tipo);
-  });
+  /*if (use_json_or_result_set) {
+    $.each( occurrences_jsons, function(key,value) {
+      mapear_marker(value.dir_json, value.tipo);
+    });
+  }
+  else {
+    map_marker_with_result_set(occurrences_within_view);
+  }*/
+  map_marker_with_result_set(occurrences_within_view);
 }
 
-function to_heatmap() {
+function to_heatmap(/*use_json_or_result_set*/) {
+  //use_json_or_result_set = (typeof use_json_or_result_set !== 'undefined' ? use_json_or_result_set : true);
+  map_state = HEATMAP_STATE;
   map_global.clear();
   
-  $.each( occurrences_jsons, function(key,value) {
-    mapear_heatmap(value.dir_json, value.tipo);
-  });
+  /*if (use_json_or_result_set) {
+    $.each( occurrences_jsons, function(key,value) {
+      mapear_heatmap(value.dir_json, value.tipo);
+    });
+  }
+  else {
+    map_heatmap_with_result_set(occurrences_within_view);
+  }*/
+  map_heatmap_with_result_set(occurrences_within_view);
 }
 
+function getOccurrencesWithinView(result_set) {
+  occurrences_within_view = [];
 
-function mapear_heatmap (dir_json, tipo) {
-  occurrences_jsons.push({tipo: tipo, dir_json: dir_json});
+  for (var i = 0; i < result_set.rows.length; i++) {
+    occurrences_within_view.push(result_set.rows.item(i));
+  }
 
+  switch (map_state) {
+    case MARKERS_STATE:
+      to_marker();
+      break;
+    case HEATMAP_STATE:
+      to_heatmap();
+      break;
+  }
+}
+
+/*function mapear_heatmap (dir_json, tipo) {
   $.getJSON( dir_json, function( data ) {
     var heatmapData = [];
     $.each( data, function(key,value) {
@@ -254,17 +215,27 @@ function mapear_heatmap (dir_json, tipo) {
         console.log("Sem coordenadas");
       }});
 
-      console.log(heatmapData);
       map_global.addHeatmap({
         data: heatmapData,
         radius: 20
       });
     });
+}*/
+
+function map_heatmap_with_result_set (result_set) {
+  data = [];
+
+  for (var i = 0; i < result_set.length; i++) {
+    data.push([result_set[i].LATITUDE, result_set[i].LONGITUDE]); // TODO Check if it's float or string
+  }
+
+  map_global.addHeatmap({
+    data: data,
+    radius: 20
+  });
 }
 
-function mapear_marker (dir_json, tipo) {
-  occurrences_jsons.push({tipo: tipo, dir_json: dir_json});
-
+/*function mapear_marker (dir_json, tipo) {
   $.getJSON( dir_json, function( data ) {
     $.each( data, function(key,value) {
       if (value.LATITUDE != "") {
@@ -285,6 +256,23 @@ function mapear_marker (dir_json, tipo) {
       }
     });
   });
+}*/
+
+function map_marker_with_result_set (result_set) {
+  for (var i = 0; i < result_set.length; i++) {
+      map_global.addMarker({
+        position: {lat:result_set[i].LATITUDE, lng:result_set[i].LONGITUDE},
+        title: result_set[i].RUBRIC,
+        icon: {
+          url: "./icons/arma.png", // TODO Make images to each type
+          size: {
+            width: 56,
+            height: 56
+          },
+          anchor: {x: 23,y: 46}
+        }
+      });
+  }
 }
 
 function addOccurrence(occurrence) {
@@ -352,17 +340,10 @@ function addOccurrence(occurrence) {
 
 function getOccurrencesWithinRectangle(maxLng, minLng, maxLat, minLat) {
   db.transaction(function (tx) {
+      var query = "SELECT occurrences.BO_YEAR, occurrences.BO_NUMBER, occurrences.BO_BEGIN_TIME, occurrences.BO_EMISSION_TIME, occurrences.DATE, occurrences.PERIOD, occurrences.COMUNICATION_DATE, occurrences.ELABORATION_DATE, occurrences.BO_AUTHORSHIP, occurrences.IS_FLAGRANT, occurrences.ADDRESS_STREET, occurrences.ADDRESS_NUMBER, occurrences.ADDRESS_DISTRICT, occurrences.ADDRESS_CITY, occurrences.ADDRESS_STATE, occurrences.LATITUDE, occurrences.LONGITUDE, occurrences.PLACE_DESCRIPTION, occurrences.EXAM, occurrences.SOLUTION, occurrences.POLICE_STATION_NAME, occurrences.POLICE_STATION_CIRCUMSCRIPTION, occurrences.SPECIES, occurrences.RUBRIC, occurrences.UNFOLDING, occurrences.STATUS, occurrences.PERSON_NAME, occurrences.PERSON_TYPE, occurrences.FATAL_VICTIM, occurrences.PERSON_RG, occurrences.PERSON_RG_STATE, occurrences.PERSON_NATURALNESS, occurrences.PERSON_NACIONALITY, occurrences.PERSON_SEX, occurrences.PERSON_DATE_OF_BIRTH, occurrences.PERSON_AGE, occurrences.PERSON_CIVIL_STATE, occurrences.PERSON_JOB, occurrences.PERSON_INSTRUCTION_DEGREE, occurrences.PERSON_SKIN_COLOR, occurrences.LINKED_NATURE, occurrences.LINK_TYPE, occurrences.RELATIONSHIP,KINSHIP, occurrences.VEHICLE_PLATE, occurrences.VEHICLE_STATE, occurrences.VEHICLE_CITY, occurrences.VEHICLE_DESCRIBED_COLOR, occurrences.VEHICLE_DESCRIBED_MODEL, occurrences.VEHICLE_FABRICATION_YEAR, occurrences.VEHICLE_MODEL_YEAR, occurrences.VEHICLE_DESCRIBED_TYPE, occurrences.PHONES_QUANTITY, occurrences.PHONE_BRAND FROM occurrences, occurrences_index WHERE occurrences.ID=occurrences_index.ID AND occurrences_index.maxLng<=(?) AND occurrences_index.minLng>=(?) AND occurrences_index.maxLat<=(?) AND occurrences_index.minLat>=(?);";
 
-      var query = "SELECT occurrences.BO_YEAR, occurrences.BO_NUMBER, occurrences.BO_BEGIN_TIME, occurrences.BO_EMISSION_TIME, occurrences.DATE, occurrences.PERIOD, occurrences.COMUNICATION_DATE, occurrences.ELABORATION_DATE, occurrences.BO_AUTHORSHIP, occurrences.IS_FLAGRANT, occurrences.ADDRESS_STREET, occurrences.ADDRESS_NUMBER, occurrences.ADDRESS_DISTRICT, occurrences.ADDRESS_CITY, occurrences.ADDRESS_STATE, occurrences.LATITUDE, occurrences.LONGITUDE, occurrences.PLACE_DESCRIPTION, occurrences.EXAM, occurrences.SOLUTION, occurrences.POLICE_STATION_NAME, occurrences.POLICE_STATION_CIRCUMSCRIPTION, occurrences.SPECIES, occurrences.RUBRIC, occurrences.UNFOLDING, occurrences.STATUS, occurrences.PERSON_NAME, occurrences.PERSON_TYPE, occurrences.FATAL_VICTIM, occurrences.PERSON_RG, occurrences.PERSON_RG_STATE, occurrences.PERSON_NATURALNESS, occurrences.PERSON_NACIONALITY, occurrences.PERSON_SEX, occurrences.PERSON_DATE_OF_BIRTH, occurrences.PERSON_AGE, occurrences.PERSON_CIVIL_STATE, occurrences.PERSON_JOB, occurrences.PERSON_INSTRUCTION_DEGREE, occurrences.PERSON_SKIN_COLOR, occurrences.LINKED_NATURE, occurrences.LINK_TYPE, occurrences.RELATIONSHIP,KINSHIP, occurrences.VEHICLE_PLATE, occurrences.VEHICLE_STATE, occurrences.VEHICLE_CITY, occurrences.VEHICLE_DESCRIBED_COLOR, occurrences.VEHICLE_DESCRIBED_MODEL, occurrences.VEHICLE_FABRICATION_YEAR, occurrences.VEHICLE_MODEL_YEAR, occurrences.VEHICLE_DESCRIBED_TYPE, occurrences.PHONES_QUANTITY, occurrences.PHONE_BRAND FROM occurrences, occurrences_index WHERE occurrences.ID=occurrences_index.ID AND occurrences_index.maxLng>=(?) AND occurrences_index.minLng<=(?) AND occurrences_index.maxLat>=(?) AND occurrences_index.minLat<=(?);";
-
-      var ret_result_set;
       tx.executeSql(query, [maxLng, minLng, maxLat, minLat], function (tx, resultSet) {
-        ret_result_set = resultSet;
-        return;
-        /*for(var i = 0; x < resultSet.rows.length; i++) {
-            console.log("First name: " + resultSet.rows.item(i).firstname +
-                ", Acct: " + resultSet.rows.item(i).acctNo);
-        }*/
+        getOccurrencesWithinView(resultSet);
       },
       function (tx, error) {
           console.log('SELECT error: ' + error.message);
@@ -372,8 +353,6 @@ function getOccurrencesWithinRectangle(maxLng, minLng, maxLat, minLat) {
   }, function () {
       console.log('transaction ok');
   });
-
-  return ret_result_set;
 }
 
 function insert_json_in_db (dir_json) {
@@ -547,7 +526,7 @@ function insert_json_in_db (dir_json) {
           VEHICLE_FABRICATION_YEAR: (value.ANO_FABRICACAO != "" ? parseInt(value.ANO_FABRICACAO) : null),
           VEHICLE_MODEL_YEAR: (value.ANO_MODELO != "" ? parseInt(value.ANO_MODELO) : null),
           VEHICLE_DESCRIBED_TYPE: (value.DESCR_TIPO_VEICULO != "" ? value.DESCR_TIPO_VEICULO : null),
-          PHONES_QUANTITY: (value.QUANT_CELULAR != "" ? parseInt(QUANT_CELULAR) : null),
+          PHONES_QUANTITY: (value.QUANT_CELULAR != "" ? parseInt(value.QUANT_CELULAR) : null),
           PHONE_BRAND: (value.MARCA_CELULAR != "" ? value.MARCA_CELULAR : null)
         }
 
@@ -561,11 +540,50 @@ function insert_json_in_db (dir_json) {
 
 //mapear_marker("./occurrences/DadosBO_2019_7(ROUBO DE CELULAR).csv_unique.csv.json", ROUBO_CELULAR);
 
+var delta_function = function (zoom) {
+  return 353.3062702684 * Math.exp(-0.6760301423 * zoom);
+}
+
 function onMapInit (map) {
+  map.on(plugin.google.maps.event.CAMERA_MOVE_END, function(cameraPosition) {
+    var delta = delta_function(cameraPosition.zoom);
+    //console.log("zoom: " + cameraPosition.zoom);
+    console.log("delta: " + delta);
+
+    if (delta <= 0.1)
+      getOccurrencesWithinRectangle(cameraPosition.target.lng + delta, cameraPosition.target.lng - delta, cameraPosition.target.lat + delta, cameraPosition.target.lat - delta);
+
+    /*map_global.addMarker({
+      position: {lat:cameraPosition.target.lat + delta, lng:cameraPosition.target.lng + delta},
+      title: "Test upper right limit of view rectangle",
+      icon: {
+        url: "./icons/transparent_red_circle.png",
+        size: {
+          width: 56,
+          height: 56
+        },
+        anchor: {x: 23,y: 46}
+      }
+    });
+
+    map_global.addMarker({
+      position: {lat:cameraPosition.target.lat - delta, lng:cameraPosition.target.lng - delta},
+      title: "Test lower left limit of view rectangle",
+      icon: {
+        url: "./icons/transparent_red_circle.png",
+        size: {
+          width: 56,
+          height: 56
+        },
+        anchor: {x: 23,y: 46}
+      }
+    });*/
+  });
+
   map.animateCamera({
     target: {lat:-22.9064, lng:-47.0616 },
     zoom: 13,
-    tilt: 30,
+    tilt: 1e-20,
     bearing: 0,
     duration: 0
   }, function() {
@@ -582,14 +600,14 @@ function onMapInit (map) {
   }, function() {
 
   });*/
-  mapear_marker("./occurrences/DadosBO_2019_7(ROUBO DE CELULAR).csv_unique.csv.json", ROUBO_CELULAR);
+  //mapear_marker("./occurrences/DadosBO_2019_7(ROUBO DE CELULAR).csv_unique.csv.json", ROUBO_CELULAR);
 }
 
-var result_set;
+var result_set_eq;
 function execute_query(query) {
   db.transaction(function (tx) {
     tx.executeSql(query, [], function(tx, resultSet) {
-      result_set = resultSet;
+      result_set_eq = resultSet;
       console.log(resultSet);
     });
 }, function (error) {
