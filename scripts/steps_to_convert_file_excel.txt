@@ -1,0 +1,62 @@
+Delete columns:
+NUMERO_BOLETIM
+DATACOMUNICACAO
+DATAELABORACAO
+BO_AUTORIA
+NUMERO_BOLETIM_PRINCIPAL
+EXAME
+SOLUCAO
+ESPECIE
+DESDOBRAMENTO
+STATUS
+TIPOPESSOA
+RG
+RG_UF
+NATURALIDADE
+NACIONALIDADE
+ESTADOCIVIL
+GRAUINSTRUCAO
+TIPOVINCULO
+RELACIONAMENTO
+PARENTESCO
+PLACA_VEICULO
+UF_VEICULO
+CIDADE_VEICULO
+DESCR_COR_VEICULO
+DESCR_MARCA_VEICULO
+ANO_FABRICACAO
+ANO_MODELO
+DESCR_TIPO_VEICULO
+QUANT_CELULAR
+MARCA_CELULAR
+
+1- Set date format in Control Panel "Format date" to yyyy-MM-dd HH:mm
+2- Replace these strings in PERIODOOCORRENCIA column
+case "PELA MANHÃ" 'M';
+case "DE MADRUGADA" 'D';
+case "A TARDE" 'N';
+case "A NOITE" 'E';
+case "EM HORA INCERTA" 'U';
+3- Replace these strings in BO_AUTORIA column
+case "Conhecida" 'K';
+case "Desconhecida" 'U';
+3- Replace these strings in FLAGRANTE and VITIMAFATAL column
+case "Sim" 'Y';
+case "Não" 'N';
+4- Change decimal comma to decimal point (in Excel File -> Settings -> Advanced)
+5- Split the column STATUS, SEXO and ESTADOCIVIL, each in two columns to leave first character in one of them
+(Data tab -> Text to columns -> Fixed Length -> Separate using rules on top)
+6- Replace these strings in CORCUTIS column
+case "Branca":
+    return 'W';
+case "Preta":
+    return 'B';
+case "Parda":
+    return 'P';
+case "Vermelha":
+    return 'R';
+case "Amarela":
+    return 'Y';
+
+7- To save as UTF-8
+Save as -> Text (separeted by tabs) -> Tools -> Web Options -> Enconding -> Save as -> UTF-8
