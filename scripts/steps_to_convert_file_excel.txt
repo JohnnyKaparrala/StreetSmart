@@ -31,32 +31,38 @@ QUANT_CELULAR
 MARCA_CELULAR
 
 1- Set date format in Control Panel "Format date" to yyyy-MM-dd HH:mm
+
 2- Replace these strings in PERIODOOCORRENCIA column
-case "PELA MANHÃ" 'M';
-case "DE MADRUGADA" 'D';
-case "A TARDE" 'N';
-case "A NOITE" 'E';
-case "EM HORA INCERTA" 'U';
-3- Replace these strings in BO_AUTORIA column
-case "Conhecida" 'K';
-case "Desconhecida" 'U';
+    case "PELA MANHÃ" 'M';
+    case "DE MADRUGADA" 'D';
+    case "A TARDE" 'N';
+    case "A NOITE" 'E';
+    case "EM HORA INCERTA" 'U';
+
+##3- Replace these strings in BO_AUTORIA column
+    case "Conhecida" 'K';
+    case "Desconhecida" 'U';
+
 3- Replace these strings in FLAGRANTE and VITIMAFATAL column
-case "Sim" 'Y';
-case "Não" 'N';
+    case "Sim" 'Y';
+    case "Não" 'N';
+
 4- Change decimal comma to decimal point (in Excel File -> Settings -> Advanced)
-5- Split the column STATUS, SEXO and ESTADOCIVIL, each in two columns to leave first character in one of them
+
+5- Split the column ##STATUS##, SEXO and ##ESTADOCIVIL##, each in two columns to leave first character in one of them
 (Data tab -> Text to columns -> Fixed Length -> Separate using rules on top)
+
 6- Replace these strings in CORCUTIS column
-case "Branca":
-    return 'W';
-case "Preta":
-    return 'B';
-case "Parda":
-    return 'P';
-case "Vermelha":
-    return 'R';
-case "Amarela":
-    return 'Y';
+    case "Branca":
+        return 'W';
+    case "Preta":
+        return 'B';
+    case "Parda":
+        return 'P';
+    case "Vermelha":
+        return 'R';
+    case "Amarela":
+        return 'Y';
 
 7- To save as UTF-8
 Save as -> Text (separeted by tabs) -> Tools -> Web Options -> Enconding -> Save as -> UTF-8

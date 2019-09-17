@@ -27,7 +27,7 @@ CREATE TABLE occurrences (
 );
 
 CREATE VIRTUAL TABLE occurrences_index USING rtree(
-	ID INTEGER PRIMARY KEY,
+	ID INTEGER PRIMARY KEY AUTOINCREMENT,
 	minLng, maxLng, -- Minimum and maximum X coordinate
 	minLat, maxLat  -- Minimum and maximum Y coordinate
 );
