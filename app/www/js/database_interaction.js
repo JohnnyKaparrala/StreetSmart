@@ -96,15 +96,21 @@ function map_marker_with_result_set (result_set) {
       });*/
   }
 
+  var labelOptions = {
+    bold: true,
+    fontSize: 15,
+    color: "white"
+  };
+
   map_global.addMarkerCluster({
     boundsDraw: false,
     markers: markers,
     icons: [
-        {min: 2, max: 11, size: {height: markers_icon_size, width: markers_icon_size}, url: "./icons/furto_celular.png", anchor: markers_icon_anchor},
-        {min: 11, max: 31, size: {height: markers_icon_size, width: markers_icon_size}, url: "./icons/furto_carro.png", anchor: markers_icon_anchor},
-        {min: 31, max: 91, size: {height: markers_icon_size, width: markers_icon_size}, url: "./icons/roubo_celular.png", anchor: markers_icon_anchor},
-        {min: 91, max: 271, size: {height: markers_icon_size, width: markers_icon_size}, url: "./icons/roubo_carro.png",anchor: markers_icon_anchor},
-        {min: 271, size: {height: markers_icon_size, width: markers_icon_size}, url: "./icons/furto_celular.png",anchor: markers_icon_anchor}//,
+        {min: 2, max: 11, size: {height: markers_icon_size, width: markers_icon_size}, url: "./icons/arma_cluster_img.png", anchor: markers_icon_anchor, label:labelOptions},
+        {min: 11, max: 31, size: {height: markers_icon_size, width: markers_icon_size}, url: "./icons/arma_cluster_img.png", anchor: markers_icon_anchor, label:labelOptions},
+        {min: 31, max: 91, size: {height: markers_icon_size, width: markers_icon_size}, url: "./icons/arma_cluster_img.png", anchor: markers_icon_anchor, label:labelOptions},
+        {min: 91, max: 271, size: {height: markers_icon_size, width: markers_icon_size}, url: "./icons/arma_cluster_img.png",anchor: markers_icon_anchor, label:labelOptions},
+        {min: 271, size: {height: markers_icon_size, width: markers_icon_size}, url: "./icons/arma_cluster_img.png",anchor: markers_icon_anchor, label:labelOptions}//,
         //{min: 91, url: "./icons/furto_celular.png",anchor: {x: 32,y: 32}}
     ]
   });
