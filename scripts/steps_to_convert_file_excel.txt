@@ -30,6 +30,8 @@ DESCR_TIPO_VEICULO
 QUANT_CELULAR
 MARCA_CELULAR
 
+File is a CSV separeted by ;
+
 1- Set date format in Control Panel "Format date" to yyyy-MM-dd HH:mm
 
 2- Replace these strings in PERIODOOCORRENCIA column

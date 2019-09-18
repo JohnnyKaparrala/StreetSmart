@@ -7,7 +7,8 @@ document.addEventListener("deviceready", function() {
     db = window.sqlitePlugin.openDatabase({
       name: 'occurrences.db',
       location: 'default',
-      androidDatabaseProvider: 'system'
+      androidDatabaseProvider: 'system',
+      createFromLocation: 1
     }, function() {},
     function (error) {
         console.log('Open database ERROR: ' + JSON.stringify(error));
@@ -16,7 +17,8 @@ document.addEventListener("deviceready", function() {
   else {
     db = window.sqlitePlugin.openDatabase({
       name: 'occurrences.db',
-      location: 'default'
+      location: 'default',
+      createFromLocation: 1
     },
     function() {},
     function (error) {
@@ -24,6 +26,9 @@ document.addEventListener("deviceready", function() {
     });
   }
 });
+
+const MARKERS_STATE = 0;
+const HEATMAP_STATE = 1;
 
 var occurrences_jsons = new Array ();
 var map_state = MARKERS_STATE;
@@ -50,12 +55,13 @@ function map_heatmap_with_result_set (result_set) {
   data = [];
 
   for (var i = 0; i < result_set.length; i++) {
-    data.push([result_set[i].LATITUDE, result_set[i].LONGITUDE]); // TODO Check if it's float or string
+    data.push([result_set[i].LATITUDE, result_set[i].LONGITUDE, 200.]);
   }
 
   map_global.addHeatmap({
     data: data,
-    radius: 20
+    radius: 20,
+    opacity: 1
   });
 }
 
@@ -63,7 +69,8 @@ function map_marker_with_result_set (result_set) {
   for (var i = 0; i < result_set.length; i++) {
       map_global.addMarker({
         position: {lat:result_set[i].LATITUDE, lng:result_set[i].LONGITUDE},
-        title: result_set[i].LINKED_NATURE,
+        title: (result_set[i].LINKED_NATURE && result_set[i].LINKED_NATURE != "" ? 
+        result_set[i].LINKED_NATURE : (result_set[i].RUBRIC && result_set[i].RUBRIC != "" ? result_set[i].RUBRIC : "Sem título")),
         icon: {
           url: "./icons/arma.png", // TODO Make images to each type
           size: {
