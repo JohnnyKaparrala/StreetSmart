@@ -65,9 +65,6 @@ function map_heatmap_with_result_set (result_set) {
   });
 }
 
-var window_min_length = Math.min(window.innerHeight, window.innerWidth)/100; //TODO Use phone's dpi
-var markers_size = 15 * window_min_length;
-var markers_anchor = {x: 23,y: 46};
 function map_marker_with_result_set (result_set) {
   var markers = [];
   for (var i = 0; i < result_set.length; i++) {
@@ -78,10 +75,10 @@ function map_marker_with_result_set (result_set) {
       icon: {
         url: "./icons/arma.png", // TODO Make images to each type
         size: {
-          width: markers_size,
-          height: markers_size
+          width: markers_icon_size,
+          height: markers_icon_size
         },
-        anchor: markers_anchor
+        anchor: markers_icon_anchor
       }
     });
       /*map_global.addMarker({
@@ -103,11 +100,11 @@ function map_marker_with_result_set (result_set) {
     boundsDraw: false,
     markers: markers,
     icons: [
-        {min: 2, max: 11, size: {height: markers_size, width: markers_size}, url: "./icons/furto_celular.png", anchor: markers_anchor},
-        {min: 11, max: 31, size: {height: markers_size, width: markers_size}, url: "./icons/furto_carro.png", anchor: markers_anchor},
-        {min: 31, max: 91, size: {height: markers_size, width: markers_size}, url: "./icons/roubo_celular.png", anchor: markers_anchor},
-        {min: 91, max: 271, size: {height: markers_size, width: markers_size}, url: "./icons/roubo_carro.png",anchor: markers_anchor},
-        {min: 271, size: {height: markers_size, width: markers_size}, url: "./icons/furto_celular.png",anchor: markers_anchor}//,
+        {min: 2, max: 11, size: {height: markers_icon_size, width: markers_icon_size}, url: "./icons/furto_celular.png", anchor: markers_icon_anchor},
+        {min: 11, max: 31, size: {height: markers_icon_size, width: markers_icon_size}, url: "./icons/furto_carro.png", anchor: markers_icon_anchor},
+        {min: 31, max: 91, size: {height: markers_icon_size, width: markers_icon_size}, url: "./icons/roubo_celular.png", anchor: markers_icon_anchor},
+        {min: 91, max: 271, size: {height: markers_icon_size, width: markers_icon_size}, url: "./icons/roubo_carro.png",anchor: markers_icon_anchor},
+        {min: 271, size: {height: markers_icon_size, width: markers_icon_size}, url: "./icons/furto_celular.png",anchor: markers_icon_anchor}//,
         //{min: 91, url: "./icons/furto_celular.png",anchor: {x: 32,y: 32}}
     ]
   });

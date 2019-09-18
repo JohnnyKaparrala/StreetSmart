@@ -117,6 +117,10 @@ document.addEventListener("deviceready", function() {
   map_global = map;
 });
 
+var window_min_length = Math.min(window.innerHeight, window.innerWidth)/100; //TODO Use phone's dpi
+var markers_icon_size = 15 * window_min_length;
+var markers_icon_anchor = {x: 23,y: 46};
+
 const HEATMAP = {id: -1, path_img: ""};
 const FURTO_CELULAR = {id: 0, path_img: "./icons/arma.png"};
 const ROUBO_CELULAR = {id: 1, path_img: "./icons/arma.png"};
