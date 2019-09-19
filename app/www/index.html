@@ -88,21 +88,55 @@
         <span class="titulo">Tipos de crime</span>
         <br><br><br><br>
         <span class="titulo">Tipos de mapa</span>
-        <br><br><br><br>
-        <span class="titulo">Período</span>
+        <br><br>
+        <span class="titulo">Horário</span>
+        <form>
+            <p>
+                <label>
+                    <input class="with-gap" name="times-filter" type="checkbox" value="D" checked />
+                    <span>De madrugada</span>
+                </label>
+            </p>
+            <p>
+                <label>
+                    <input class="with-gap" name="times-filter" type="checkbox" value="M" checked />
+                    <span>De manhã</span>
+                </label>
+            </p>
+            <p>
+                <label>
+                    <input class="with-gap" name="times-filter" type="checkbox" value="N" checked />
+                    <span>À tarde</span>
+                </label>
+            </p>
+            <p>
+                <label>
+                    <input class="with-gap" name="times-filter" type="checkbox" value="E" checked />
+                    <span>À noite</span>
+                </label>
+            </p>
+            <p>
+                <label>
+                    <input class="with-gap" name="times-filter" type="checkbox" value="U" checked />
+                    <span>Horário indefinido</span>
+                </label>
+            </p>
+        </form>
+        <br><br>
+        <span class="titulo">Período de tempo</span>
         <div class="grey-text row">
           <div class="input-field col s6">
-              <input id="de" type="text" class="datepicker">
-              <label for="de">De</label>
+              <input id="period-start-date-datepicker" type="text" class="datepicker">
+              <label for="period-start-date-datepicker">Data de início</label>
           </div>
           <div class="input-field col s6">
-              <input id="ate" type="text" class="datepicker">
-              <label for="ate">Até</label>
+              <input id="period-end-date-datepicker" type="text" class="datepicker">
+              <label for="period-end-date-datepicker">Data de fim</label>
           </div>
         </div>
       </div>
       <div class="modal-footer">
-        <a href="#!" class="modal-close waves-effect waves-green btn-flat">Aplicar filtros</a>
+        <a id="aplicar-filtros-btn" href="#!" class="modal-close waves-effect waves-green btn-flat">Aplicar filtros</a>
       </div>
     </div>
   </body>

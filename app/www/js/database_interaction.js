@@ -33,6 +33,7 @@ const HEATMAP_STATE = 1;
 var occurrences_jsons = new Array ();
 var map_state = MARKERS_STATE;
 var occurrences_within_view = [];
+var where_conditions = [];
 
 function getOccurrencesWithinView(result_set) {
   occurrences_within_view = [];
@@ -167,8 +168,15 @@ function addOccurrence(occurrence) {
 
 function getOccurrencesWithinRectangle(maxLng, minLng, maxLat, minLat) {
   db.transaction(function (tx) {
-      var query = "SELECT occurrences.BO_YEAR, occurrences.BO_NUMBER, occurrences.BO_BEGIN_TIME, occurrences.BO_EMISSION_TIME, occurrences.DATE, occurrences.PERIOD, occurrences.IS_FLAGRANT, occurrences.ADDRESS_STREET, occurrences.ADDRESS_NUMBER, occurrences.ADDRESS_DISTRICT, occurrences.ADDRESS_CITY, occurrences.ADDRESS_STATE, occurrences.LATITUDE, occurrences.LONGITUDE, occurrences.PLACE_DESCRIPTION, occurrences.POLICE_STATION_NAME, occurrences.POLICE_STATION_CIRCUMSCRIPTION, occurrences.RUBRIC, occurrences.FATAL_VICTIM, occurrences.PERSON_SEX, occurrences.PERSON_AGE, occurrences.PERSON_SKIN_COLOR, occurrences.LINKED_NATURE FROM occurrences, occurrences_index WHERE occurrences.ID=occurrences_index.ID AND occurrences_index.maxLng<=(?) AND occurrences_index.minLng>=(?) AND occurrences_index.maxLat<=(?) AND occurrences_index.minLat>=(?);";
+      var query = "SELECT occurrences.BO_YEAR, occurrences.BO_NUMBER, occurrences.BO_BEGIN_TIME, occurrences.BO_EMISSION_TIME, occurrences.DATE, occurrences.PERIOD, occurrences.IS_FLAGRANT, occurrences.ADDRESS_STREET, occurrences.ADDRESS_NUMBER, occurrences.ADDRESS_DISTRICT, occurrences.ADDRESS_CITY, occurrences.ADDRESS_STATE, occurrences.LATITUDE, occurrences.LONGITUDE, occurrences.PLACE_DESCRIPTION, occurrences.POLICE_STATION_NAME, occurrences.POLICE_STATION_CIRCUMSCRIPTION, occurrences.RUBRIC, occurrences.FATAL_VICTIM, occurrences.PERSON_SEX, occurrences.PERSON_AGE, occurrences.PERSON_SKIN_COLOR, occurrences.LINKED_NATURE FROM occurrences, occurrences_index WHERE occurrences.ID=occurrences_index.ID ";
+      
+      for (var i = 0; i < where_conditions.length; i++) {
+        query += "AND " + where_conditions[i] + " ";
+      }
 
+      query += "AND occurrences_index.maxLng<=(?) AND occurrences_index.minLng>=(?) AND occurrences_index.maxLat<=(?) AND occurrences_index.minLat>=(?);";
+
+      console.log("query: " + query);
       tx.executeSql(query, [maxLng, minLng, maxLat, minLat], function (tx, resultSet) {
         getOccurrencesWithinView(resultSet);
       },
@@ -182,31 +190,31 @@ function getOccurrencesWithinRectangle(maxLng, minLng, maxLat, minLat) {
   });
 }
 
-function insert_json_in_db (dir_json) {
-  function convert_date_format(date) {
-    // date: DD/MM/YYYY HH:MM
-    var return_string = "";
-    var parts = date.split(" ");
-    var first_half = parts[0].split("/");
+function convert_date_format_to_sqlite(date) {
+  // date: DD/MM/YYYY HH:MM
+  var return_string = "";
+  var parts = date.split(" ");
+  var first_half = parts[0].split("/");
 
-    var year = first_half[2];
-    var month = first_half[1];
-    var day = first_half[0];
+  var year = first_half[2];
+  var month = first_half[1];
+  var day = first_half[0];
 
-    return_string = year + "-" + month + "-" + day;
+  return_string = year + "-" + month + "-" + day;
 
-    if (parts.length == 2) {
-      /*var second_half = parts[1].split(":");
+  if (parts.length == 2) {
+    /*var second_half = parts[1].split(":");
 
-      var hours = second_half[0];
-      var minutes = second_half[1];*/
+    var hours = second_half[0];
+    var minutes = second_half[1];*/
 
-      return_string = return_string + " " + parts[1]; // hours + ":" + minutes
-    }
-
-    return return_string;
+    return_string = return_string + " " + parts[1]; // hours + ":" + minutes
   }
 
+  return return_string;
+}
+
+function insert_json_in_db (dir_json) {
   function convert_period(period) {
     period = period.toUpperCase();
 
@@ -271,9 +279,9 @@ function insert_json_in_db (dir_json) {
         var occurrence = {
           BO_YEAR: (value.ANO_BO != "" ? parseInt(value.ANO_BO) : null),
           BO_NUMBER: (value.NUM_BO != "" ? parseInt(value.NUM_BO) : null),
-          BO_BEGIN_TIME: (value.BO_INICIADO != "" ? convert_date_format(value.BO_INICIADO) : null),
-          BO_EMISSION_TIME: (value.BO_EMITIDO != "" ? convert_date_format(value.BO_EMITIDO) : null),
-          DATE: (value.DATAOCORRENCIA != "" ? convert_date_format(value.DATAOCORRENCIA) : null),
+          BO_BEGIN_TIME: (value.BO_INICIADO != "" ? convert_date_format_to_sqlite(value.BO_INICIADO) : null),
+          BO_EMISSION_TIME: (value.BO_EMITIDO != "" ? convert_date_format_to_sqlite(value.BO_EMITIDO) : null),
+          DATE: (value.DATAOCORRENCIA != "" ? convert_date_format_to_sqlite(value.DATAOCORRENCIA) : null),
           PERIOD: (value.PERIDOOCORRENCIA != "" ? convert_period(value.PERIDOOCORRENCIA) : null),
           IS_FLAGRANT: (value.FLAGRANTE != "" ? convert_yes_no_to_bool(value.FLAGRANTE) : null),
           ADDRESS_STREET: (value.LOGRADOURO != "" ? value.LOGRADOURO : null),

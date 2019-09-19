@@ -6,6 +6,27 @@ var map_global;
 var db;
 
 document.addEventListener("deviceready", function() {
+  $('.datepicker').datepicker({
+    i18n: {
+      months: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'],
+      monthsShort: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+      weekdays: ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sabádo'],
+      weekdaysShort: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'],
+      weekdaysAbbrev: ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'],
+      today: 'Hoje',
+      clear: 'Limpar',
+      cancel: 'Sair',
+      done: 'Confirmar',
+      labelMonthNext: 'Próximo mês',
+      labelMonthPrev: 'Mês anterior',
+      labelMonthSelect: 'Selecione um mês',
+      labelYearSelect: 'Selecione um ano',
+      selectMonths: true,
+      selectYears: 15,
+    },
+    format: "dd/mm/yyyy"
+  });
+
   $('#opcoes').sidenav({
     onOpenStart: function() {
     setVar('state','side_menu');
@@ -34,6 +55,8 @@ document.addEventListener("deviceready", function() {
     $("#search_places").val("");
     $("#search_places").focus();
   });
+
+  $('#aplicar-filtros-btn').click(apply_filters);
 
   document.addEventListener("backbutton", onBackKeyDown, false);
 
@@ -117,8 +140,25 @@ document.addEventListener("deviceready", function() {
   map_global = map;
 });
 
+function apply_filters (event) {
+  // TODO Finish
+  where_conditions.splice(0,where_conditions.length); // clear the array
+  var period_from_str = $("#period-start-date-datepicker").val();
+  var period_until_str = $("#period-end-date-datepicker").val();
+
+  if (period_from_str != "" && period_until_str != "") {
+    period_from_str = convert_date_format_to_sqlite(period_from_str);
+    period_until_str = convert_date_format_to_sqlite(period_until_str);
+
+    if (period_from_str < period_until_str)
+      where_conditions.push("OCCURRENCES.DATE BETWEEN '" + period_from_str + "' AND '" + period_until_str + "'");
+    else
+      M.toast({html: 'Data de início deve ser anterior à data de fim. Desconsiderando o período especificado.'});
+  }
+}
+
 var window_min_length = Math.min(window.innerHeight, window.innerWidth)/100; //TODO Use phone's dpi
-var markers_icon_size = 15 * window_min_length;
+var markers_icon_size = 10.9375 * window_min_length;
 var markers_icon_anchor = {x: 23,y: 46};
 
 const HEATMAP = {id: -1, path_img: ""};
@@ -207,9 +247,6 @@ function to_heatmap(/*use_json_or_result_set*/) {
   });
 }*/
 
-
-//mapear_marker("./occurrences/DadosBO_2019_7(ROUBO DE CELULAR).csv_unique.csv.json", ROUBO_CELULAR);
-
 var delta_function = function (zoom) {
   return 353.306270268435128 * Math.exp(-0.676030142340657 * zoom);
 }
@@ -280,10 +317,6 @@ function onMapInit (map) {
     });*/
   });
 
-  /*map.on(plugin.google.maps.event.CAMERA_MOVE_START, function(cameraPosition) {
-    previous_camera_position = cameraPosition;
-  });*/
-
   map.animateCamera({
     target: {lat:-22.9064, lng:-47.0616 },
     zoom: 13,
@@ -293,16 +326,16 @@ function onMapInit (map) {
   }, function() {
   });
   /*map.getMyLocation(function(location) {
+    console.log(location);
     map.animateCamera({
       target: location.latLng,
-      zoom: 13,
-      tilt: 30,
+      zoom: 14,
+      //tilt: 1e-20,
       bearing: 0,
       duration: 1000
     }, function() {
     });
   }, function() {
-
+    console.log("error");
   });*/
-  //mapear_marker("./occurrences/DadosBO_2019_7(ROUBO DE CELULAR).csv_unique.csv.json", ROUBO_CELULAR);
 }
