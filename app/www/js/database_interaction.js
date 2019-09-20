@@ -156,7 +156,7 @@ function map_marker_with_result_set (result_set) {
       console.log("query: " + query);
       tx.executeSql(query, [], function (tx, resultSet) {
         //marker.setTitle(resultSet.rows.item(0).RUBRIC);
-        marker_description = '\n' + "Horário: " + substitute_period(resultSet.rows.item(0).PERIOD) +
+        var marker_description = '\n' + "Horário: " + substitute_period(resultSet.rows.item(0).PERIOD) +
         '\n' + "Data: " + convert_date_iso_format_to_brazilian_format(resultSet.rows.item(0).DATE);
 
         if (resultSet.rows.item(0).IS_FLAGRANT !== undefined) {

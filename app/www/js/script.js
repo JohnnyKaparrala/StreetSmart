@@ -329,8 +329,6 @@ function onMapInit (map) {
     if (!moved_camera_considerably && !changed_zoom_considerably)
       return;
 
-    
-
     //console.log("zoom: " + cameraPosition.zoom);
     console.log("delta: " + delta);
 
