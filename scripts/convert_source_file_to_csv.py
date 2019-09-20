@@ -39,8 +39,10 @@ def convert_source_file(path):
     def convert_yes_no(yes_no):
         if (yes_no == "Sim"):
             return 'Y'
-        else # yes_no == "Não"
+        else: # yes_no == "Não"
             return 'N'
+
+    # TODO def convert_skin_color(skin_color)
 
     source_file = open(path, 'rb')
     file_data = source_file.read().replace(b'\x00', b'')
