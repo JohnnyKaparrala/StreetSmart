@@ -67,12 +67,47 @@ function map_heatmap_with_result_set (result_set) {
 }
 
 function map_marker_with_result_set (result_set) {
+  function substitute_period(period) {
+    switch (period) {
+      case 'M':
+        return "De manhã";
+      case 'D':
+        return "De madrugada";
+      case 'N':
+        return 'À tarde';
+      case 'E':
+        return 'À noite';
+      case 'U':
+        return 'Em hora incerta';
+    }
+  }
+
+  function convert_date_iso_format_to_brazilian_format(date) {
+    date_parts = date.split('-');
+
+    return date_parts[2] + '/' + date_parts[1] + '/' + date_parts[0];
+  }
+
   var markers = [];
   for (var i = 0; i < result_set.length; i++) {
+    var marker_type;
+    if (result_set[i].LINKED_NATURE !== undefined && result_set[i].LINKED_NATURE != "")
+      marker_type = result_set[i].LINKED_NATURE;
+    else if (result_set[i].RUBRIC !== undefined && result_set[i].RUBRIC != "")
+      marker_type = result_set[i].RUBRIC;
+    else
+      marker_type = "Sem tipo";
+
+    marker_description = marker_type +
+    '\n' + "Horário: " + substitute_period(result_set[i].PERIOD) +
+    '\n' + "Data: " + convert_date_iso_format_to_brazilian_format(result_set[i].DATE);
+
+    if (marker_description.IS_FLAGRANT !== undefined) {
+      marker_description += '\n' + (marker_description.IS_FLAGRANT ? "É flagrante" : "Não é flagrante");
+    }
     markers.push({
       position: {lat:result_set[i].LATITUDE, lng:result_set[i].LONGITUDE},
-      title: (result_set[i].LINKED_NATURE && result_set[i].LINKED_NATURE != "" ? 
-      result_set[i].LINKED_NATURE : (result_set[i].RUBRIC && result_set[i].RUBRIC != "" ? result_set[i].RUBRIC : "Sem título")),
+      title: marker_description,
       icon: {
         url: "./icons/arma.png", // TODO Make images to each type
         size: {

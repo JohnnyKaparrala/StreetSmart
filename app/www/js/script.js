@@ -146,6 +146,20 @@ function apply_filters (event) {
   var period_from_str = $("#period-start-date-datepicker").val();
   var period_until_str = $("#period-end-date-datepicker").val();
 
+  var occurrences_types = [];
+  $("[name='times-filter'][type=checkbox]:checked").each(function (index, checkbox){ occurrences_types.push(checkbox.value); });
+
+  if (occurrences_types.length > 0 && occurrences_types.length < 5) {
+    var occurrences_types_condition = "(OCCURRENCES.PERIOD = '" + occurrences_types[0] + "'";
+    
+    for (var i = 1; i < occurrences_types.length; i++) {
+      occurrences_types_condition += "OR OCCURRENCES.PERIOD = '" + occurrences_types[i] + "'";
+    }
+
+    occurrences_types_condition += ")";
+    where_conditions.push(occurrences_types_condition);
+  }
+
   if (period_from_str != "" && period_until_str != "") {
     period_from_str = convert_date_format_to_sqlite(period_from_str);
     period_until_str = convert_date_format_to_sqlite(period_until_str);
@@ -155,10 +169,12 @@ function apply_filters (event) {
     else
       M.toast({html: 'Data de início deve ser anterior à data de fim. Desconsiderando o período especificado.'});
   }
+
+  refresh_map_occurrences();
 }
 
 var window_min_length = Math.min(window.innerHeight, window.innerWidth)/100; //TODO Use phone's dpi
-var markers_icon_size = 10.9375 * window_min_length;
+var markers_icon_size = 10.833333333333334 * window_min_length;
 var markers_icon_anchor = {x: 23,y: 46};
 
 const HEATMAP = {id: -1, path_img: ""};
@@ -254,42 +270,17 @@ var delta_function = function (zoom) {
 var previous_camera_position;
 var previous_delta;
 var dist = 0.6;
-var zoom_change = 0.05;
+var zoom_change = 0.21;
+
+function refresh_map_occurrences() {
+  getOccurrencesWithinRectangle(previous_camera_position.target.lng + previous_delta, previous_camera_position.target.lng - previous_delta,
+    previous_camera_position.target.lat + previous_delta, previous_camera_position.target.lat - previous_delta);
+}
+
 function onMapInit (map) {
   map.on(plugin.google.maps.event.CAMERA_MOVE_END, function(cameraPosition) {
     var delta = delta_function(cameraPosition.zoom);
 
-    var moved_camera_considerably = true;
-    var changed_zoom_considerably = true;
-    if (previous_camera_position)
-    {
-      var d_y = (previous_camera_position.target.lat - cameraPosition.target.lat);
-      var d_x = (previous_camera_position.target.lng - cameraPosition.target.lng);
-      var distance = Math.sqrt(d_x * d_x + d_y * d_y);
-
-      //console.log("distance/delta: " + (distance/delta));
-      
-      moved_camera_considerably = ((distance/delta) > dist);
-    }
-    if (previous_delta) {
-      //console.log("delta difference: " + (Math.abs(delta - previous_delta)));
-      changed_zoom_considerably = (Math.abs(delta - previous_delta) > zoom_change);
-    }
-
-    //console.log("moved_camera_considerably: " + moved_camera_considerably + "; changed_zoom_considerably: " + changed_zoom_considerably);
-    if (!moved_camera_considerably && !changed_zoom_considerably)
-      return;
-
-    previous_camera_position = cameraPosition;
-    previous_delta = delta;
-
-    //console.log("zoom: " + cameraPosition.zoom);
-    console.log("delta: " + delta);
-
-    if (delta <= 0.1)
-      getOccurrencesWithinRectangle(cameraPosition.target.lng + delta, cameraPosition.target.lng - delta, cameraPosition.target.lat + delta, cameraPosition.target.lat - delta);
-    else
-      M.toast({html: 'Aumente o zoom para ver as occorrências de uma região.'});
     /*map_global.addMarker({
       position: {lat:cameraPosition.target.lat + delta, lng:cameraPosition.target.lng + delta},
       title: "Test upper right limit of view rectangle",
@@ -315,11 +306,45 @@ function onMapInit (map) {
         anchor: {x: 23,y: 46}
       }
     });*/
+
+    var moved_camera_considerably = true;
+    var changed_zoom_considerably = true;
+    if (previous_camera_position)
+    {
+      var d_y = (previous_camera_position.target.lat - cameraPosition.target.lat);
+      var d_x = (previous_camera_position.target.lng - cameraPosition.target.lng);
+      var distance = Math.sqrt(d_x * d_x + d_y * d_y);
+
+      //console.log("distance/delta: " + (distance/delta));
+      
+      moved_camera_considerably = ((distance/previous_delta) > dist);
+    }
+    if (previous_delta) {
+      //console.log("delta difference: " + (Math.abs(delta - previous_delta)));
+      //(delta - previous_delta)/previous_delta = delta/previous_delta - 1
+      changed_zoom_considerably = ((Math.abs(delta/previous_delta - 1)) > zoom_change);
+    }
+
+    //console.log("moved_camera_considerably: " + moved_camera_considerably + "; changed_zoom_considerably: " + changed_zoom_considerably);
+    if (!moved_camera_considerably && !changed_zoom_considerably)
+      return;
+
+    previous_camera_position = cameraPosition;
+    previous_delta = delta;
+
+    //console.log("zoom: " + cameraPosition.zoom);
+    console.log("delta: " + delta);
+
+    if (delta <= 0.1)
+      getOccurrencesWithinRectangle(cameraPosition.target.lng + delta, cameraPosition.target.lng - delta, cameraPosition.target.lat + delta, cameraPosition.target.lat - delta);
+    else
+      M.toast({html: 'Aumente o zoom para ver as occorrências de uma região.'});
+    
   });
 
   map.animateCamera({
     target: {lat:-22.9064, lng:-47.0616 },
-    zoom: 13,
+    zoom: 14,
     //tilt: 1e-20,
     bearing: 0,
     duration: 0
