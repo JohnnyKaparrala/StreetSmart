@@ -90,24 +90,20 @@ function map_marker_with_result_set (result_set) {
 
   var markers = [];
   for (var i = 0; i < result_set.length; i++) {
-    var marker_type;
+    /*var marker_type;
     if (result_set[i].LINKED_NATURE !== undefined && result_set[i].LINKED_NATURE != "")
       marker_type = result_set[i].LINKED_NATURE;
     else if (result_set[i].RUBRIC !== undefined && result_set[i].RUBRIC != "")
       marker_type = result_set[i].RUBRIC;
     else
-      marker_type = "Sem tipo";
+      marker_type = "Sem tipo";*/
 
-    marker_description = marker_type +
-    '\n' + "Horário: " + substitute_period(result_set[i].PERIOD) +
-    '\n' + "Data: " + convert_date_iso_format_to_brazilian_format(result_set[i].DATE);
-
-    if (marker_description.IS_FLAGRANT !== undefined) {
-      marker_description += '\n' + (marker_description.IS_FLAGRANT ? "É flagrante" : "Não é flagrante");
-    }
+    
     markers.push({
+      id: result_set[i].ID,
       position: {lat:result_set[i].LATITUDE, lng:result_set[i].LONGITUDE},
-      title: marker_description,
+      title: result_set[i].RUBRIC,
+      snippet: "...",
       icon: {
         url: "./icons/arma.png", // TODO Make images to each type
         size: {
@@ -139,6 +135,7 @@ function map_marker_with_result_set (result_set) {
   };
 
   map_global.addMarkerCluster({
+    maxZoomLevel: 17.5,
     boundsDraw: false,
     markers: markers,
     icons: [
@@ -149,7 +146,35 @@ function map_marker_with_result_set (result_set) {
         {min: 271, size: {height: markers_icon_size, width: markers_icon_size}, url: "./icons/arma_cluster_img.png",anchor: markers_icon_anchor, label:labelOptions}//,
         //{min: 91, url: "./icons/furto_celular.png",anchor: {x: 32,y: 32}}
     ]
-  });
+  }).on(plugin.google.maps.event.MARKER_CLICK, function (position, marker) {
+    if (marker.getSnippet() !== "...")
+      return;
+    
+    db.transaction(function (tx) {
+      var query = "SELECT occurrences.PERIOD, occurrences.DATE, occurrences.LINKED_NATURE FROM occurrences WHERE occurrences.ID=" + marker.get("id");
+
+      console.log("query: " + query);
+      tx.executeSql(query, [], function (tx, resultSet) {
+        //marker.setTitle(resultSet.rows.item(0).RUBRIC);
+        marker_description = '\n' + "Horário: " + substitute_period(resultSet.rows.item(0).PERIOD) +
+        '\n' + "Data: " + convert_date_iso_format_to_brazilian_format(resultSet.rows.item(0).DATE);
+
+        if (resultSet.rows.item(0).IS_FLAGRANT !== undefined) {
+          marker_description += '\n' + (resultSet.rows.item(0).IS_FLAGRANT ? "É flagrante" : "Não é flagrante");
+        }
+        marker.setSnippet(marker_description);
+        marker.showInfoWindow();
+      },
+      function (tx, error) {
+          console.log('SELECT error: ' + error.message);
+      });
+    }, function (error) {
+      console.log('transaction error: ' + error.message);
+    }, function () {
+      console.log('transaction ok');
+    });
+    
+  });;
 }
 
 function addOccurrence(occurrence) {
@@ -203,7 +228,7 @@ function addOccurrence(occurrence) {
 
 function getOccurrencesWithinRectangle(maxLng, minLng, maxLat, minLat) {
   db.transaction(function (tx) {
-      var query = "SELECT occurrences.BO_YEAR, occurrences.BO_NUMBER, occurrences.BO_BEGIN_TIME, occurrences.BO_EMISSION_TIME, occurrences.DATE, occurrences.PERIOD, occurrences.IS_FLAGRANT, occurrences.ADDRESS_STREET, occurrences.ADDRESS_NUMBER, occurrences.ADDRESS_DISTRICT, occurrences.ADDRESS_CITY, occurrences.ADDRESS_STATE, occurrences.LATITUDE, occurrences.LONGITUDE, occurrences.PLACE_DESCRIPTION, occurrences.POLICE_STATION_NAME, occurrences.POLICE_STATION_CIRCUMSCRIPTION, occurrences.RUBRIC, occurrences.FATAL_VICTIM, occurrences.PERSON_SEX, occurrences.PERSON_AGE, occurrences.PERSON_SKIN_COLOR, occurrences.LINKED_NATURE FROM occurrences, occurrences_index WHERE occurrences.ID=occurrences_index.ID ";
+      var query = "SELECT occurrences.ID, occurrences.LATITUDE, occurrences.LONGITUDE, occurrences.RUBRIC FROM occurrences, occurrences_index WHERE occurrences.ID=occurrences_index.ID ";
       
       for (var i = 0; i < where_conditions.length; i++) {
         query += "AND " + where_conditions[i] + " ";

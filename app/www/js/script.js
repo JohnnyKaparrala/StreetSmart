@@ -322,24 +322,28 @@ function onMapInit (map) {
     if (previous_delta) {
       //console.log("delta difference: " + (Math.abs(delta - previous_delta)));
       //(delta - previous_delta)/previous_delta = delta/previous_delta - 1
-      changed_zoom_considerably = ((Math.abs(delta/previous_delta - 1)) > zoom_change);
+      changed_zoom_considerably = ((delta/previous_delta - 1) > zoom_change);
     }
 
     //console.log("moved_camera_considerably: " + moved_camera_considerably + "; changed_zoom_considerably: " + changed_zoom_considerably);
     if (!moved_camera_considerably && !changed_zoom_considerably)
       return;
 
-    previous_camera_position = cameraPosition;
-    previous_delta = delta;
+    
 
     //console.log("zoom: " + cameraPosition.zoom);
     console.log("delta: " + delta);
 
     if (delta <= 0.1)
+    {
+      previous_camera_position = cameraPosition;
+      previous_delta = delta;
       getOccurrencesWithinRectangle(cameraPosition.target.lng + delta, cameraPosition.target.lng - delta, cameraPosition.target.lat + delta, cameraPosition.target.lat - delta);
+    }
     else
+    {
       M.toast({html: 'Aumente o zoom para ver as occorrências de uma região.'});
-    
+    }
   });
 
   map.animateCamera({
