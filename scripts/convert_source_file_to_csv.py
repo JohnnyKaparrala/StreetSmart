@@ -201,8 +201,6 @@ def convert_source_files_in_folder(path_to_folder_with_files, merged_and_convert
             
             writer.writerow([row[0], row[1], convert_date(row[3]), convert_date(row[4]), convert_date(row[5]), convert_period(row[6]), convert_yes_no(row[10]), row[12], row[13], row[14], row[15], row[16], row[17].replace(',', '.'), row[18].replace(',', '.'), row[19], row[22], row[23], row[25], convert_yes_no(row[30]), (row[35][0] if len(row[35]) > 0 else ''), row[37], convert_skin_color(row[41]), row[42]])
     
-    
-    
         source_file.close()
         remove(file_name + '.clean') # Deletes the created file
 
@@ -213,4 +211,4 @@ def convert_source_files_in_folder(path_to_folder_with_files, merged_and_convert
 if __name__ == '__main__':
     #convert(sys.argv[1], sys.argv[2])
     #convert_source_file("G:/Programming/TCC/dados_ssp/source/DadosBO_2019_7(LESÃO CORPORAL DOLOSA SEGUIDA DE MORTE).xls".replace('/', '\\'))
-    convert_source_files_in_folder("G:\Programming\TCC\dados_ssp\source", "G:\Programming\TCC\dados_ssp\source\merged.csv")
+    convert_source_files_in_folder("G:\\Programming\\TCC\\dados_ssp\\source", "G:\\Programming\\TCC\\dados_ssp\\source\\merged.csv")

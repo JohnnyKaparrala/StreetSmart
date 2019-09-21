@@ -1,6 +1,7 @@
 .vscode/
 app/hooks
 app/platforms
+*.csv#
 
 # Cordova Global
 app/plugins/

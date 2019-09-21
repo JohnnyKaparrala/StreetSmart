@@ -173,7 +173,7 @@ function apply_filters (event) {
   refresh_map_occurrences();
 }
 
-var window_min_length = Math.min(window.innerHeight, window.innerWidth)/100; //TODO Use phone's dpi
+var window_min_length = Math.min(screen.height, screen.width)/100; //TODO Use phone's dpi
 var markers_icon_size = 10.833333333333334 * window_min_length;
 var markers_icon_anchor = {x: 23,y: 46};
 
@@ -190,37 +190,6 @@ var occurrences_jsons = new Array ();
 var map_state = MARKERS_STATE;
 var occurrences_within_view = [];
 
-function to_marker(/*use_json_or_result_set*/) {
-  //use_json_or_result_set = (typeof use_json_or_result_set !== 'undefined' ? use_json_or_result_set : true);
-  map_state = MARKERS_STATE;
-  //map_global.clear();
-
-  /*if (use_json_or_result_set) {
-    $.each( occurrences_jsons, function(key,value) {
-      mapear_marker(value.dir_json, value.tipo);
-    });
-  }
-  else {
-    map_marker_with_result_set(occurrences_within_view);
-  }*/
-  map_marker_with_result_set(occurrences_within_view);
-}
-
-function to_heatmap(/*use_json_or_result_set*/) {
-  //use_json_or_result_set = (typeof use_json_or_result_set !== 'undefined' ? use_json_or_result_set : true);
-  map_state = HEATMAP_STATE;
-  //map_global.clear();
-  
-  /*if (use_json_or_result_set) {
-    $.each( occurrences_jsons, function(key,value) {
-      mapear_heatmap(value.dir_json, value.tipo);
-    });
-  }
-  else {
-    map_heatmap_with_result_set(occurrences_within_view);
-  }*/
-  map_heatmap_with_result_set(occurrences_within_view);
-}
 
 /*function mapear_heatmap (dir_json, tipo) {
   $.getJSON( dir_json, function( data ) {

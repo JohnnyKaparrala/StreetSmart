@@ -42,18 +42,16 @@ var global_minLat;
 var where_conditions = [];
 
 function getOccurrencesWithinView(result_set) {
-  occurrences_within_view = [];
-
-  for (var i = 0; i < result_set.rows.length; i++) {
-    occurrences_within_view.push(result_set.rows.item(i));
-  }
+  occurrences_within_view = result_set;
 
   switch (map_state) {
     case MARKERS_STATE:
-      to_marker();
+      map_state = MARKERS_STATE;
+      map_marker_with_result_set(occurrences_within_view);
       break;
     case HEATMAP_STATE:
-      to_heatmap();
+      map_state = HEATMAP_STATE;
+      map_heatmap_with_result_set(occurrences_within_view);
       break;
   }
 }
