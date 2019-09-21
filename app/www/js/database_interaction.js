@@ -32,7 +32,13 @@ const HEATMAP_STATE = 1;
 
 var occurrences_jsons = new Array ();
 var map_state = MARKERS_STATE;
+
 var occurrences_within_view = [];
+var global_maxLng;
+var global_minLng;
+var global_maxLat;
+var global_minLat;
+
 var where_conditions = [];
 
 function getOccurrencesWithinView(result_set) {
@@ -88,7 +94,15 @@ function map_marker_with_result_set (result_set) {
     return date_parts[2] + '/' + date_parts[1] + '/' + date_parts[0];
   }
 
-  var markers = [];
+  var markers = []; //todo trocar lugar de declaracao
+
+  
+  for (var i = 0; i < markers.length; i++) {//removes occurrences that are not in bounds
+    if (markers[i].position.lat < global_minLat || markers[i].position.lat > global_maxLat || markers[i].position.lat < global_minLng || markers[i].position.lat > global_maxLng) {
+      markers.splice(i, 1); 
+    }
+  }
+
   for (var i = 0; i < result_set.length; i++) {
     /*var marker_type;
     if (result_set[i].LINKED_NATURE !== undefined && result_set[i].LINKED_NATURE != "")
@@ -227,6 +241,10 @@ function addOccurrence(occurrence) {
 }
 
 function getOccurrencesWithinRectangle(maxLng, minLng, maxLat, minLat) {
+  global_maxLng = maxLng;
+  global_minLng = minLng;
+  global_maxLat = maxLat;
+  global_minLat = minLat;
   db.transaction(function (tx) {
       var query = "SELECT occurrences.ID, occurrences.LATITUDE, occurrences.LONGITUDE, occurrences.RUBRIC FROM occurrences, occurrences_index WHERE occurrences.ID=occurrences_index.ID ";
       

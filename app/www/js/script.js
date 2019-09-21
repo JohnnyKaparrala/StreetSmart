@@ -193,7 +193,7 @@ var occurrences_within_view = [];
 function to_marker(/*use_json_or_result_set*/) {
   //use_json_or_result_set = (typeof use_json_or_result_set !== 'undefined' ? use_json_or_result_set : true);
   map_state = MARKERS_STATE;
-  map_global.clear();
+  //map_global.clear();
 
   /*if (use_json_or_result_set) {
     $.each( occurrences_jsons, function(key,value) {
@@ -209,7 +209,7 @@ function to_marker(/*use_json_or_result_set*/) {
 function to_heatmap(/*use_json_or_result_set*/) {
   //use_json_or_result_set = (typeof use_json_or_result_set !== 'undefined' ? use_json_or_result_set : true);
   map_state = HEATMAP_STATE;
-  map_global.clear();
+  //map_global.clear();
   
   /*if (use_json_or_result_set) {
     $.each( occurrences_jsons, function(key,value) {
