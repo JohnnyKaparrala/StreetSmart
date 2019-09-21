@@ -340,6 +340,7 @@ function onMapInit (map) {
     }
     else
     {
+      $('.toast').hide();
       M.toast({html: 'Aumente o zoom para ver as occorrências de uma região.'});
     }
   });

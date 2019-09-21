@@ -38,6 +38,7 @@ var global_maxLng;
 var global_minLng;
 var global_maxLat;
 var global_minLat;
+var markers = [];
 
 var where_conditions = [];
 
@@ -93,25 +94,25 @@ function map_marker_with_result_set (result_set) {
 
     return date_parts[2] + '/' + date_parts[1] + '/' + date_parts[0];
   }
-
-  var markers = []; //todo trocar lugar de declaracao
-
   
-  for (var i = 0; i < markers.length; i++) {//removes occurrences that are not in bounds
+  for (var i = 0; i < markers.length; i++) {//remove todas as ocorrencias q n estao na visao
     if (markers[i].position.lat < global_minLat || markers[i].position.lat > global_maxLat || markers[i].position.lat < global_minLng || markers[i].position.lat > global_maxLng) {
-      markers.splice(i, 1); 
+      markers[i].remove();
+      markers.splice(i, 1);
+      i = i-1;
     }
   }
 
+  console.log(markers);
+loop_rs:
   for (var i = 0; i < result_set.length; i++) {
-    /*var marker_type;
-    if (result_set[i].LINKED_NATURE !== undefined && result_set[i].LINKED_NATURE != "")
-      marker_type = result_set[i].LINKED_NATURE;
-    else if (result_set[i].RUBRIC !== undefined && result_set[i].RUBRIC != "")
-      marker_type = result_set[i].RUBRIC;
-    else
-      marker_type = "Sem tipo";*/
-
+loop_mark:
+    for (var j = 0; j < markers.length; j++) {
+      if (markers[j].id == result_set[i].ID) {
+        console.log(markers[j].id + "; " + result_set[i].ID);
+        continue loop_rs;
+      }
+    }
     
     markers.push({
       id: result_set[i].ID,
@@ -127,19 +128,6 @@ function map_marker_with_result_set (result_set) {
         anchor: markers_icon_anchor
       }
     });
-      /*map_global.addMarker({
-        position: {lat:result_set[i].LATITUDE, lng:result_set[i].LONGITUDE},
-        title: (result_set[i].LINKED_NATURE && result_set[i].LINKED_NATURE != "" ? 
-        result_set[i].LINKED_NATURE : (result_set[i].RUBRIC && result_set[i].RUBRIC != "" ? result_set[i].RUBRIC : "Sem título")),
-        icon: {
-          url: "./icons/arma.png", // TODO Make images to each type
-          size: {
-            width: 56,
-            height: 56
-          },
-          anchor: {x: 23,y: 46}
-        }
-      });*/
   }
 
   var labelOptions = {
@@ -148,16 +136,18 @@ function map_marker_with_result_set (result_set) {
     color: "white"
   };
 
+  //map_global.clear();
+
   map_global.addMarkerCluster({
     maxZoomLevel: 17.5,
     boundsDraw: false,
     markers: markers,
     icons: [
-        {min: 2, max: 11, size: {height: markers_icon_size, width: markers_icon_size}, url: "./icons/arma_cluster_img.png", anchor: markers_icon_anchor, label:labelOptions},
-        {min: 11, max: 31, size: {height: markers_icon_size, width: markers_icon_size}, url: "./icons/arma_cluster_img.png", anchor: markers_icon_anchor, label:labelOptions},
-        {min: 31, max: 91, size: {height: markers_icon_size, width: markers_icon_size}, url: "./icons/arma_cluster_img.png", anchor: markers_icon_anchor, label:labelOptions},
-        {min: 91, max: 271, size: {height: markers_icon_size, width: markers_icon_size}, url: "./icons/arma_cluster_img.png",anchor: markers_icon_anchor, label:labelOptions},
-        {min: 271, size: {height: markers_icon_size, width: markers_icon_size}, url: "./icons/arma_cluster_img.png",anchor: markers_icon_anchor, label:labelOptions}//,
+        {min: 2, size: {height: markers_icon_size, width: markers_icon_size}, url: "./icons/arma_cluster_img.png", anchor: markers_icon_anchor, label:labelOptions}//,
+        //{min: 11, max: 31, size: {height: markers_icon_size, width: markers_icon_size}, url: "./icons/arma_cluster_img.png", anchor: markers_icon_anchor, label:labelOptions},
+        //{min: 31, max: 91, size: {height: markers_icon_size, width: markers_icon_size}, url: "./icons/arma_cluster_img.png", anchor: markers_icon_anchor, label:labelOptions},
+        //{min: 91, max: 271, size: {height: markers_icon_size, width: markers_icon_size}, url: "./icons/arma_cluster_img.png",anchor: markers_icon_anchor, label:labelOptions},
+        //{min: 271, size: {height: markers_icon_size, width: markers_icon_size}, url: "./icons/arma_cluster_img.png",anchor: markers_icon_anchor, label:labelOptions}//,
         //{min: 91, url: "./icons/furto_celular.png",anchor: {x: 32,y: 32}}
     ]
   }).on(plugin.google.maps.event.MARKER_CLICK, function (position, marker) {
