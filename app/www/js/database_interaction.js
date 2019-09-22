@@ -117,8 +117,8 @@ function map_marker_with_result_set (result_set) {
     if (markers_id.has(result_set.rows.item(i).ID)) {
       continue;
     }
-    
-    markers_to_be_added.push({
+
+    marker_to_be_added = {
       id: result_set.rows.item(i).ID,
       position: {lat:result_set.rows.item(i).LATITUDE, lng:result_set.rows.item(i).LONGITUDE},
       title: result_set.rows.item(i).RUBRIC,
@@ -131,7 +131,9 @@ function map_marker_with_result_set (result_set) {
         },
         anchor: markers_icon_anchor
       }
-    });
+    };
+    markers_to_be_added.push(marker_to_be_added);
+
     markers_id.add(result_set.rows.item(i).ID);
   }
 
@@ -164,7 +166,8 @@ function map_marker_with_result_set (result_set) {
         return;
       
       db.transaction(function (tx) {
-        var query = "SELECT occurrences.PERIOD, occurrences.DATE, occurrences.LINKED_NATURE FROM occurrences WHERE occurrences.ID=" + marker.get("id");
+        var marker_id = marker.get("id");
+        var query = "SELECT occurrences.PERIOD, occurrences.DATE, occurrences.LINKED_NATURE FROM occurrences WHERE occurrences.ID=" + marker_id;
   
         console.log("query: " + query);
         tx.executeSql(query, [], function (tx, resultSet) {
@@ -177,6 +180,10 @@ function map_marker_with_result_set (result_set) {
           }
           marker.setSnippet(marker_description);
           marker.showInfoWindow();
+
+          marker.on(plugin.google.maps.event.INFO_CLICK, function(marker) {
+            get_all_details(marker_id);
+          });
         },
         function (tx, error) {
             console.log('SELECT error: ' + error.message);
@@ -240,6 +247,48 @@ function addOccurrence(occurrence) {
   }, function() {
       console.log('transaction ok');
   });
+}
+
+function get_all_details (marker_id) {
+  db.transaction(function (tx) {
+    var query = "SELECT BO_YEAR, BO_NUMBER, BO_BEGIN_TIME, BO_EMISSION_TIME, DATE, PERIOD, IS_FLAGRANT, ADDRESS_STREET, ADDRESS_NUMBER, ADDRESS_DISTRICT, ADDRESS_CITY, ADDRESS_STATE, LATITUDE, LONGITUDE, PLACE_DESCRIPTION, POLICE_STATION_NAME, POLICE_STATION_CIRCUMSCRIPTION, RUBRIC, FATAL_VICTIM, PERSON_SEX, PERSON_AGE, PERSON_SKIN_COLOR, LINKED_NATURE FROM occurrences WHERE occurrences.ID= (?) ";
+
+    tx.executeSql(query, [marker_id], function (tx, resultSet) {
+      var rs = resultSet.rows.item(0);
+      console.log((rs.BO_YEAR=="")?"Não fornecido":rs.BO_YEAR);
+      $("#mod_ano").text((rs.BO_YEAR=="")?"Não fornecido":rs.BO_YEAR);
+      $("#mod_numero").text((rs.BO_NUMBER=="")?"Não fornecido":rs.BO_NUMBER);
+      $("#mod_bo_iniciado").text((rs.BO_BEGIN_TIME=="")?"Não fornecido":rs.BO_BEGIN_TIME);
+      $("#mod_bo_emitido").text((rs.BO_EMISSION_TIME=="")?"Não fornecido":rs.BO_EMISSION_TIME);
+      $("#mod_data").text((rs.DATE=="")?"Não fornecido":rs.DATE);
+      $("#mod_periodo").text((rs.PERIOD=="")?"Não fornecido":rs.PERIOD);
+      $("#mod_flagrante").text((rs.IS_FLAGRANT=="")?"Não fornecido":rs.IS_FLAGRANT);
+      $("#mod_rua").text((rs.ADDRESS_STREET=="")?"Não fornecido":rs.ADDRESS_STREET);
+      $("#mod_numero").text((rs.ADDRESS_NUMBER=="")?"Não fornecido":rs.ADDRESS_NUMBER);
+      $("#mod_cidade").text((rs.ADDRESS_DISTRICT=="")?"Não fornecido":rs.ADDRESS_DISTRICT);
+      $("#mod_bairro").text((rs.ADDRESS_CITY=="")?"Não fornecido":rs.ADDRESS_CITY);
+      $("#mod_estado").text((rs.ADDRESS_STATE=="")?"Não fornecido":rs.ADDRESS_STATE);
+      $("#mod_latitude").text((rs.LATITUDE=="")?"Não fornecido":rs.LATITUDE);
+      $("#mod_longitude").text((rs.LONGITUDE=="")?"Não fornecido":rs.LONGITUDE);
+      $("#mod_descricao_local").text((rs.PLACE_DESCRIPTION=="")?"Não fornecido":rs.PLACE_DESCRIPTION);
+      $("#mod_nome_delegacia").text((rs.POLICE_STATION_NAME=="")?"Não fornecido":rs.POLICE_STATION_NAME);
+      $("#mod_delegacia_circunscricao").text((rs.POLICE_STATION_CIRCUMSCRIPTION=="")?"Não fornecido":rs.POLICE_STATION_CIRCUMSCRIPTION);
+      $("#mod_rubrica").text((rs.RUBRIC=="")?"Não fornecido":rs.RUBRIC);
+      $("#mod_vitima_fatal").text((rs.FATAL_VICTIM=="")?"Não fornecido":rs.FATAL_VICTIM);
+      $("#mod_sexo").text((rs.PERSON_SEX=="")?"Não fornecido":rs.PERSON_SEX);
+      $("#mod_idade").text((rs.PERSON_AGE=="")?"Não fornecido":rs.PERSON_AGE);
+      $("#mod_cor_cutis").text((rs.PERSON_SKIN_COLOR=="")?"Não fornecido":rs.PERSON_SKIN_COLOR);
+      $("#mod_natureza_vinculada").text((rs.LINKED_NATURE=="")?"Não fornecido":rs.LINKED_NATURE);
+      $("#ocorrencia_detalhes").modal('open');
+    },
+    function (tx, error) {
+        console.log('SELECT error: ' + error.message);
+    });
+}, function (error) {
+    console.log('transaction error: ' + error.message);
+}, function () {
+    console.log('transaction ok');
+});
 }
 
 function getOccurrencesWithinRectangle(maxLng, minLng, maxLat, minLat) {

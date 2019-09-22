@@ -26,7 +26,8 @@ document.addEventListener("deviceready", function() {
     },
     format: "dd/mm/yyyy"
   });
-
+  
+  $('.modal').modal();
   $('#opcoes').sidenav({
     onOpenStart: function() {
     setVar('state','side_menu');
@@ -52,8 +53,15 @@ document.addEventListener("deviceready", function() {
   }); //onclick="setVar('state','side_menu');"
 
   $('#close-btn').click(function(e) {
-    $("#search_places").val("");
-    $("#search_places").focus();
+    $("#pesquisa-input").fadeOut(100);
+    $("#close-btn").fadeOut(100);
+    $("#pesquisa-text-container").css({width:"56px",right:"23px"});
+    $("#pesquisa-text-container").fadeOut(100);
+
+    $("#menu-btn-container").fadeIn(200);
+    $("#pesquisa-btn-container").css({display:"block"});
+
+    setVar("state","home");
   });
 
   $('#aplicar-filtros-btn').click(apply_filters);
@@ -330,6 +338,18 @@ function onMapInit (map) {
     }
   });
 
+  map.setOptions({
+    'gestures': {
+      'tilt': false,
+      'rotate': false
+    },
+    'preferences': {
+      'zoom': {
+        'minZoom': 11
+      }
+    }
+  });
+
   map.animateCamera({
     target: {lat:-22.9064, lng:-47.0616 },
     zoom: 14,
@@ -338,6 +358,7 @@ function onMapInit (map) {
     duration: 0
   }, function() {
   });
+
   /*map.getMyLocation(function(location) {
     console.log(location);
     map.animateCamera({
