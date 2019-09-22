@@ -1324,7 +1324,6 @@ Map.prototype.addHeatmap = function(heatmapOptions, callback) {
     }
   }, self.errorHandler, self.__pgmId, 'loadPlugin', ['Heatmap', heatmapOptions, heatmap.hashCode]);
 
-  console.log(result);
   return heatmap;
 };
 

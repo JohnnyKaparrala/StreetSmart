@@ -137,7 +137,12 @@ document.addEventListener("deviceready", function() {
 
   $("#rbtn-heatmap").on("click", function (event) {
     map_state = HEATMAP_STATE;
-    map_global.clear();
+    if (marker_cluster != null) {
+      marker_cluster.remove();
+      marker_cluster = null;
+    }
+    markers.splice(0, markers.length);
+    markers_id.clear();
     map_heatmap_with_result_set(occurrences_within_view);
   });
   $("#rbtn-marker").on("click", function (event) {

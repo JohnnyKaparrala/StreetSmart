@@ -175,25 +175,51 @@ cordova.getActivity().runOnUiThread(new Runnable() {
     
     final JSONArray data = args.getJSONArray(1);
     LinkedList<WeightedLatLng> data_points = new LinkedList<WeightedLatLng>();
-  for (int i = 0; i < data.length(); i++) {
+
+    int entries_with_error = 0;
+    int entries_with_error_in_weight = 0;
+    for (int i = 0; i < data.length(); i++) {
       JSONArray coord = data.getJSONArray(i);
 
-      double lat = coord.getDouble(0);
-      double lon = coord.getDouble(1);
+      double lat = 0.;
+      double lon = 0.;
 
-      data_points.add(new WeightedLatLng(new LatLng(lat, lon), 1.));
+      try {
+        lat = coord.getDouble(0);
+        lon = coord.getDouble(1);
+      }
+      catch (JSONException je) {
+        entries_with_error++;
+        continue;
+      }
+
+      double weight = 1.;
+      if (coord.length() == 3)
+        try {
+          weight = coord.getDouble(2);
+        }
+        catch (JSONException je) {
+          weight = 1.;
+          entries_with_error_in_weight++;
+        }
+
+      data_points.add(new WeightedLatLng(new LatLng(lat, lon), weight));
+    }
+
+    if (entries_with_error > 0) {
+      callbackContext.error("Error while parsing latitude or longitude doubles from " + new Integer(entries_with_error).toString() + " entries.");
+    }
+    if (entries_with_error_in_weight > 0) {
+      callbackContext.error("Error while parsing weight double from " + new Integer(entries_with_error_in_weight).toString() + " entries.");
     }
 
     final HeatmapTileProvider heatmap = this.getHeatmapTileProvider(id);
-cordova.getActivity().runOnUiThread(new Runnable() {
+    cordova.getActivity().runOnUiThread(new Runnable() {
       @Override
       public void run() {
-        // Recalculate the heatmap bounds
         heatmap.setWeightedData(data_points);
         TileOverlay heatmapTileOverlay = (TileOverlay)pluginMap.objects.get("heatmapTileOverlay_" + heatmapHashCode);
         heatmapTileOverlay.clearTileCache();
-        //String propertyId = "heatmap_bounds_" + heatmapHashCode;
-        //pluginMap.objects.put(propertyId, bounds);
         callbackContext.success();
       }
     });

@@ -62,14 +62,14 @@ function getOccurrencesWithinView(result_set) {
 function map_heatmap_with_result_set (result_set) {
   data = [];
 
-  for (var i = 0; i < result_set.length; i++) {
+  for (var i = 0; i < result_set.rows.length; i++) {
     data.push([result_set.rows.item(i).LATITUDE, result_set.rows.item(i).LONGITUDE, 200.]);
   }
 
-  if (marker_cluster != null) {
+  /*if (marker_cluster != null) {
     marker_cluster.remove();
     marker_cluster = null;
-  }
+  }*/
 
   map_global.addHeatmap({
     data: data,
@@ -111,7 +111,7 @@ function map_marker_with_result_set (result_set) {
     }
   }
 
-  console.log(markers);
+  //console.log(markers);
   var markers_to_be_added = [];
   for (var i = 0; i < result_set.rows.length; i++) {
     if (markers_id.has(result_set.rows.item(i).ID)) {
