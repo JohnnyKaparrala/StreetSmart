@@ -1,9 +1,6 @@
-function setVar (key, value) {
-  window.localStorage.setItem(key, value);
-}
+/* globals MARKERS_STATE, HEATMAP_STATE, markers, markers_id, marker_cluster:writable, where_conditions, setVar, convert_date_format_to_sqlite, getOccurrencesWithinRectangle, map_heatmap_with_result_set, map_marker_with_result_set, map_state:writable, occurrences_within_view */
 
 var map_global;
-var db;
 
 document.addEventListener("deviceready", function() {
   $('.datepicker').datepicker({
@@ -42,7 +39,7 @@ document.addEventListener("deviceready", function() {
   }, onCloseEnd: function() {
     setVar('state','home');}});
   
-  $('#pesquisa-btn-container').click(function(e) {
+  $('#pesquisa-btn-container').click(function(/*e*/) {
     $("#pesquisa-text-container").fadeIn(100);
     $("#pesquisa-text-container").css({width: (($(window).width()-40) + "px"),right:"20px"});
     $("#pesquisa-input").delay(500).fadeIn(100);
@@ -52,7 +49,7 @@ document.addEventListener("deviceready", function() {
     $("#pesquisa-btn-container").css({display:"none"});
   }); //onclick="setVar('state','side_menu');"
 
-  $('#close-btn').click(function(e) {
+  $('#close-btn').click(function(/*e*/) {
     $("#pesquisa-input").fadeOut(100);
     $("#close-btn").fadeOut(100);
     $("#pesquisa-text-container").css({width:"56px",right:"23px"});
@@ -95,9 +92,9 @@ document.addEventListener("deviceready", function() {
         navigator.app.exitApp();
       }break;
 
-      default :{
+      /*default :{
         
-      }
+      }*/
     }
   }
 
@@ -109,7 +106,7 @@ document.addEventListener("deviceready", function() {
   });
 
   var map = plugin.google.maps.Map.getMap(div, map_style_object);
-  
+
   window.addEventListener('keyboardDidHide', function() {
     $(':text').blur();
   });
@@ -143,29 +140,12 @@ document.addEventListener("deviceready", function() {
     }
   });
 
-  $("#rbtn-heatmap").on("click", function (event) {
-    map_state = HEATMAP_STATE;
-    if (marker_cluster != null) {
-      marker_cluster.remove();
-      marker_cluster = null;
-    }
-    markers.splice(0, markers.length);
-    markers_id.clear();
-    map_heatmap_with_result_set(occurrences_within_view);
-  });
-  $("#rbtn-marker").on("click", function (event) {
-    map_state = MARKERS_STATE;
-    map_global.clear();
-    map_marker_with_result_set(occurrences_within_view);
-  });
-
   setVar("state","home");
   map.one(plugin.google.maps.event.MAP_READY, onMapInit);
   map_global = map;
 });
 
-function apply_filters (event) {
-  // TODO Finish
+function apply_filters (/*event*/) {
   where_conditions.splice(0,where_conditions.length); // clear the array
   var period_from_str = $("#period-start-date-datepicker").val();
   var period_until_str = $("#period-end-date-datepicker").val();
@@ -197,22 +177,14 @@ function apply_filters (event) {
   refresh_map_occurrences();
 }
 
-var window_min_length = Math.min(screen.height, screen.width)/100; //TODO Use phone's dpi
-var markers_icon_size = 10.833333333333334 * window_min_length;
-var markers_icon_anchor = {x: 23,y: 46};
-
-const HEATMAP = {id: -1, path_img: ""};
+/*const HEATMAP = {id: -1, path_img: ""};
 const FURTO_CELULAR = {id: 0, path_img: "./icons/arma.png"};
 const ROUBO_CELULAR = {id: 1, path_img: "./icons/arma.png"};
 const FURTO_VEICULOS = {id: 2, path_img: "./icons/arma.png"};
 const ROUBO_VEICULOS = {id: 3, path_img: "./icons/arma.png"};
 const LATROCINIO = {id: 4, path_img: "./icons/arma.png"};
 const LESAO_CORPORAL_SEGUIDA_DE_MORTE = {id: 5, path_img: "./icons/arma.png"};
-const HOMICIDIO_DOLOSO = {id: 6, path_img: "./icons/arma.png"};
-
-var occurrences_jsons = new Array ();
-var map_state = MARKERS_STATE;
-var occurrences_within_view = [];
+const HOMICIDIO_DOLOSO = {id: 6, path_img: "./icons/arma.png"};*/
 
 
 /*function mapear_heatmap (dir_json, tipo) {
@@ -372,4 +344,20 @@ function onMapInit (map) {
   }, function() {
     console.log("error");
   });*/
+  
+  $("#rbtn-heatmap").on("click", function (/*event*/) {
+    map_state = HEATMAP_STATE;
+    if (marker_cluster != null) {
+      marker_cluster.remove();
+      marker_cluster = null;
+    }
+    markers.splice(0, markers.length);
+    markers_id.clear();
+    map_heatmap_with_result_set(occurrences_within_view);
+  });
+  $("#rbtn-marker").on("click", function (/*event*/) {
+    map_state = MARKERS_STATE;
+    map_global.clear();
+    map_marker_with_result_set(occurrences_within_view);
+  });
 }

@@ -20,7 +20,8 @@
     "cordova-plugin-nativegeocoder": "^3.2.2",
     "cordova-plugin-navigationbar-color": "0.0.9",
     "cordova-plugin-statusbar": "^2.4.3",
-    "cordova-plugin-whitelist": "1"
+    "cordova-plugin-whitelist": "1",
+    "eslint": "^6.4.0"
   },
   "cordova": {
     "plugins": {

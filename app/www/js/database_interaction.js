@@ -1,4 +1,27 @@
+/* global map_global */
+
 var db;
+var MARKERS_STATE = 0;
+var HEATMAP_STATE = 1;
+
+var map_state = MARKERS_STATE;
+
+var occurrences_within_view = [];
+var global_maxLng;
+var global_minLng;
+var global_maxLat;
+var global_minLat;
+var markers = [];
+var markers_id = new Set();
+var marker_cluster;
+
+var where_conditions = [];
+
+var result_set_eq;
+
+//var window_min_length = Math.min(screen.height, screen.width)/100; //TODO Use phone's dpi
+var markers_icon_size = 10.833333333333334 * (Math.min(screen.height, screen.width)/100);
+var markers_icon_anchor = {x: 23,y: 46};
 
 document.addEventListener("deviceready", function() {
   if (cordova.platformId == 'android') {
@@ -27,23 +50,6 @@ document.addEventListener("deviceready", function() {
   }
 });
 
-const MARKERS_STATE = 0;
-const HEATMAP_STATE = 1;
-
-var occurrences_jsons = new Array ();
-var map_state = MARKERS_STATE;
-
-var occurrences_within_view = [];
-var global_maxLng;
-var global_minLng;
-var global_maxLat;
-var global_minLat;
-var markers = [];
-var markers_id = new Set();
-var marker_cluster;
-
-var where_conditions = [];
-
 function getOccurrencesWithinView(result_set) {
   occurrences_within_view = result_set;
 
@@ -60,7 +66,7 @@ function getOccurrencesWithinView(result_set) {
 }
 
 function map_heatmap_with_result_set (result_set) {
-  data = [];
+  var data = [];
 
   for (var i = 0; i < result_set.rows.length; i++) {
     data.push([result_set.rows.item(i).LATITUDE, result_set.rows.item(i).LONGITUDE, 200.]);
@@ -95,7 +101,7 @@ function map_marker_with_result_set (result_set) {
   }
 
   function convert_date_iso_format_to_brazilian_format(date) {
-    date_parts = date.split('-');
+    var date_parts = date.split('-');
 
     return date_parts[2] + '/' + date_parts[1] + '/' + date_parts[0];
   }
@@ -113,12 +119,12 @@ function map_marker_with_result_set (result_set) {
 
   //console.log(markers);
   var markers_to_be_added = [];
-  for (var i = 0; i < result_set.rows.length; i++) {
+  for (var i = 0; i < result_set.rows.length; i++) { /* eslint-disable-line no-redeclare */
     if (markers_id.has(result_set.rows.item(i).ID)) {
       continue;
     }
 
-    marker_to_be_added = {
+    var marker_to_be_added = {
       id: result_set.rows.item(i).ID,
       position: {lat:result_set.rows.item(i).LATITUDE, lng:result_set.rows.item(i).LONGITUDE},
       title: result_set.rows.item(i).RUBRIC,
@@ -181,7 +187,7 @@ function map_marker_with_result_set (result_set) {
           marker.setSnippet(marker_description);
           marker.showInfoWindow();
 
-          marker.on(plugin.google.maps.event.INFO_CLICK, function(marker) {
+          marker.on(plugin.google.maps.event.INFO_CLICK, function(/*marker*/) {
             get_all_details(marker_id);
           });
         },
@@ -291,7 +297,7 @@ function get_all_details (marker_id) {
 });
 }
 
-function getOccurrencesWithinRectangle(maxLng, minLng, maxLat, minLat) {
+function getOccurrencesWithinRectangle(maxLng, minLng, maxLat, minLat) { /* eslint-disable-line no-unused-vars */
   global_maxLng = maxLng;
   global_minLng = minLng;
   global_maxLat = maxLat;
@@ -439,7 +445,7 @@ function insert_json_in_db (dir_json) {
   });
 }
 
-var result_set_eq;
+
 function execute_query(query) {
   db.transaction(function (tx) {
     tx.executeSql(query, [], function(tx, resultSet) {
