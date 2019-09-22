@@ -39,6 +39,8 @@ var global_minLng;
 var global_maxLat;
 var global_minLat;
 var markers = [];
+var markers_id = new Set();
+var marker_cluster;
 
 var where_conditions = [];
 
@@ -61,7 +63,12 @@ function map_heatmap_with_result_set (result_set) {
   data = [];
 
   for (var i = 0; i < result_set.length; i++) {
-    data.push([result_set[i].LATITUDE, result_set[i].LONGITUDE, 200.]);
+    data.push([result_set.rows.item(i).LATITUDE, result_set.rows.item(i).LONGITUDE, 200.]);
+  }
+
+  if (marker_cluster != null) {
+    marker_cluster.remove();
+    marker_cluster = null;
   }
 
   map_global.addHeatmap({
@@ -94,28 +101,27 @@ function map_marker_with_result_set (result_set) {
   }
   
   for (var i = 0; i < markers.length; i++) {//remove todas as ocorrencias q n estao na visao
-    if (markers[i].position.lat < global_minLat || markers[i].position.lat > global_maxLat || markers[i].position.lat < global_minLng || markers[i].position.lat > global_maxLng) {
-      markers[i].remove();
+    var position = markers[i].getPosition();
+    if (position.lat < global_minLat || position.lat > global_maxLat || position.lng < global_minLng || position.lng > global_maxLng) {
+      markers_id.delete(markers[i].get("id"));
+
+      marker_cluster._removeMarkerById(markers[i].getId());
       markers.splice(i, 1);
       i = i-1;
     }
   }
 
   console.log(markers);
-loop_rs:
-  for (var i = 0; i < result_set.length; i++) {
-loop_mark:
-    for (var j = 0; j < markers.length; j++) {
-      if (markers[j].id == result_set[i].ID) {
-        console.log(markers[j].id + "; " + result_set[i].ID);
-        continue loop_rs;
-      }
+  var markers_to_be_added = [];
+  for (var i = 0; i < result_set.rows.length; i++) {
+    if (markers_id.has(result_set.rows.item(i).ID)) {
+      continue;
     }
     
-    markers.push({
-      id: result_set[i].ID,
-      position: {lat:result_set[i].LATITUDE, lng:result_set[i].LONGITUDE},
-      title: result_set[i].RUBRIC,
+    markers_to_be_added.push({
+      id: result_set.rows.item(i).ID,
+      position: {lat:result_set.rows.item(i).LATITUDE, lng:result_set.rows.item(i).LONGITUDE},
+      title: result_set.rows.item(i).RUBRIC,
       snippet: "...",
       icon: {
         url: "./icons/arma.png", // TODO Make images to each type
@@ -126,6 +132,7 @@ loop_mark:
         anchor: markers_icon_anchor
       }
     });
+    markers_id.add(result_set.rows.item(i).ID);
   }
 
   var labelOptions = {
@@ -136,47 +143,54 @@ loop_mark:
 
   //map_global.clear();
 
-  map_global.addMarkerCluster({
-    maxZoomLevel: 17.5,
-    boundsDraw: false,
-    markers: markers,
-    icons: [
-        {min: 2, size: {height: markers_icon_size, width: markers_icon_size}, url: "./icons/arma_cluster_img.png", anchor: markers_icon_anchor, label:labelOptions}//,
-        //{min: 11, max: 31, size: {height: markers_icon_size, width: markers_icon_size}, url: "./icons/arma_cluster_img.png", anchor: markers_icon_anchor, label:labelOptions},
-        //{min: 31, max: 91, size: {height: markers_icon_size, width: markers_icon_size}, url: "./icons/arma_cluster_img.png", anchor: markers_icon_anchor, label:labelOptions},
-        //{min: 91, max: 271, size: {height: markers_icon_size, width: markers_icon_size}, url: "./icons/arma_cluster_img.png",anchor: markers_icon_anchor, label:labelOptions},
-        //{min: 271, size: {height: markers_icon_size, width: markers_icon_size}, url: "./icons/arma_cluster_img.png",anchor: markers_icon_anchor, label:labelOptions}//,
-        //{min: 91, url: "./icons/furto_celular.png",anchor: {x: 32,y: 32}}
-    ]
-  }).on(plugin.google.maps.event.MARKER_CLICK, function (position, marker) {
-    if (marker.getSnippet() !== "...")
-      return;
-    
-    db.transaction(function (tx) {
-      var query = "SELECT occurrences.PERIOD, occurrences.DATE, occurrences.LINKED_NATURE FROM occurrences WHERE occurrences.ID=" + marker.get("id");
-
-      console.log("query: " + query);
-      tx.executeSql(query, [], function (tx, resultSet) {
-        //marker.setTitle(resultSet.rows.item(0).RUBRIC);
-        var marker_description = '\n' + "Horário: " + substitute_period(resultSet.rows.item(0).PERIOD) +
-        '\n' + "Data: " + convert_date_iso_format_to_brazilian_format(resultSet.rows.item(0).DATE);
-
-        if (resultSet.rows.item(0).IS_FLAGRANT !== undefined) {
-          marker_description += '\n' + (resultSet.rows.item(0).IS_FLAGRANT ? "É flagrante" : "Não é flagrante");
-        }
-        marker.setSnippet(marker_description);
-        marker.showInfoWindow();
-      },
-      function (tx, error) {
-          console.log('SELECT error: ' + error.message);
-      });
-    }, function (error) {
-      console.log('transaction error: ' + error.message);
-    }, function () {
-      console.log('transaction ok');
+  if (marker_cluster == null)
+  {
+    marker_cluster = map_global.addMarkerCluster({
+      maxZoomLevel: 17.5,
+      boundsDraw: false,
+      markers: [],
+      icons: [
+          {min: 2, size: {height: markers_icon_size, width: markers_icon_size}, url: "./icons/arma_cluster_img.png", anchor: markers_icon_anchor, label:labelOptions}//,
+          //{min: 11, max: 31, size: {height: markers_icon_size, width: markers_icon_size}, url: "./icons/arma_cluster_img.png", anchor: markers_icon_anchor, label:labelOptions},
+          //{min: 31, max: 91, size: {height: markers_icon_size, width: markers_icon_size}, url: "./icons/arma_cluster_img.png", anchor: markers_icon_anchor, label:labelOptions},
+          //{min: 91, max: 271, size: {height: markers_icon_size, width: markers_icon_size}, url: "./icons/arma_cluster_img.png",anchor: markers_icon_anchor, label:labelOptions},
+          //{min: 271, size: {height: markers_icon_size, width: markers_icon_size}, url: "./icons/arma_cluster_img.png",anchor: markers_icon_anchor, label:labelOptions}//,
+          //{min: 91, url: "./icons/furto_celular.png",anchor: {x: 32,y: 32}}
+      ]
     });
     
-  });;
+    marker_cluster.on(plugin.google.maps.event.MARKER_CLICK, function (position, marker) {
+      if (marker.getSnippet() !== "...")
+        return;
+      
+      db.transaction(function (tx) {
+        var query = "SELECT occurrences.PERIOD, occurrences.DATE, occurrences.LINKED_NATURE FROM occurrences WHERE occurrences.ID=" + marker.get("id");
+  
+        console.log("query: " + query);
+        tx.executeSql(query, [], function (tx, resultSet) {
+          //marker.setTitle(resultSet.rows.item(0).RUBRIC);
+          var marker_description = '\n' + "Horário: " + substitute_period(resultSet.rows.item(0).PERIOD) +
+          '\n' + "Data: " + convert_date_iso_format_to_brazilian_format(resultSet.rows.item(0).DATE);
+  
+          if (resultSet.rows.item(0).IS_FLAGRANT !== undefined) {
+            marker_description += '\n' + (resultSet.rows.item(0).IS_FLAGRANT ? "É flagrante" : "Não é flagrante");
+          }
+          marker.setSnippet(marker_description);
+          marker.showInfoWindow();
+        },
+        function (tx, error) {
+            console.log('SELECT error: ' + error.message);
+        });
+      }, function (error) {
+        console.log('transaction error: ' + error.message);
+      }, function () {
+        console.log('transaction ok');
+      });
+      
+    });
+  }
+  
+  markers = markers.concat(marker_cluster.addMarkers(markers_to_be_added));
 }
 
 function addOccurrence(occurrence) {

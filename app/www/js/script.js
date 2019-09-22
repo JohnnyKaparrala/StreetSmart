@@ -135,6 +135,17 @@ document.addEventListener("deviceready", function() {
     }
   });
 
+  $("#rbtn-heatmap").on("click", function (event) {
+    map_state = HEATMAP_STATE;
+    map_global.clear();
+    map_heatmap_with_result_set(occurrences_within_view);
+  });
+  $("#rbtn-marker").on("click", function (event) {
+    map_state = MARKERS_STATE;
+    map_global.clear();
+    map_marker_with_result_set(occurrences_within_view);
+  });
+
   setVar("state","home");
   map.one(plugin.google.maps.event.MAP_READY, onMapInit);
   map_global = map;
