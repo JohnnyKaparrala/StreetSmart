@@ -1,4 +1,8 @@
-/* globals MARKERS_STATE, HEATMAP_STATE, markers, markers_id, marker_cluster:writable, where_conditions, setVar, convert_date_format_to_sqlite, getOccurrencesWithinRectangle, map_heatmap_with_result_set, map_marker_with_result_set, map_state:writable, occurrences_within_view */
+/* globals MARKERS_STATE, HEATMAP_STATE, markers, markers_id, marker_cluster:writable, where_conditions, convert_date_format_to_sqlite, getOccurrencesWithinRectangle, map_heatmap_with_result_set, map_marker_with_result_set, map_state:writable, occurrences_within_view */
+
+function setVar (key, value) {
+  window.localStorage.setItem(key, value);
+}
 
 var map_global;
 
