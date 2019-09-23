@@ -19,7 +19,7 @@ var where_conditions = [];
 
 var result_set_eq;
 
-//var window_min_length = Math.min(screen.height, screen.width)/100; //TODO Use phone's dpi
+//TODO Maybe use phone's dpi
 var markers_icon_size = 10.833333333333334 * (Math.min(screen.height, screen.width)/100);
 var markers_icon_anchor = {x: 23,y: 46};
 
@@ -72,11 +72,6 @@ function map_heatmap_with_result_set (result_set) {
     data.push([result_set.rows.item(i).LATITUDE, result_set.rows.item(i).LONGITUDE, 200.]);
   }
 
-  /*if (marker_cluster != null) {
-    marker_cluster.remove();
-    marker_cluster = null;
-  }*/
-
   map_global.addHeatmap({
     data: data,
     radius: 20,
@@ -106,7 +101,8 @@ function map_marker_with_result_set (result_set) {
     return date_parts[2] + '/' + date_parts[1] + '/' + date_parts[0];
   }
   
-  for (var i = 0; i < markers.length; i++) {//remove todas as ocorrencias q n estao na visao
+  // Removes all occurrences that aren't within vision
+  for (var i = 0; i < markers.length; i++) {
     var position = markers[i].getPosition();
     if (position.lat < global_minLat || position.lat > global_maxLat || position.lng < global_minLng || position.lng > global_maxLng) {
       markers_id.delete(markers[i].get("id"));
@@ -117,7 +113,6 @@ function map_marker_with_result_set (result_set) {
     }
   }
 
-  //console.log(markers);
   var markers_to_be_added = [];
   for (var i = 0; i < result_set.rows.length; i++) { /* eslint-disable-line no-redeclare */
     if (markers_id.has(result_set.rows.item(i).ID)) {
@@ -149,8 +144,6 @@ function map_marker_with_result_set (result_set) {
     color: "white"
   };
 
-  //map_global.clear();
-
   if (marker_cluster == null)
   {
     marker_cluster = map_global.addMarkerCluster({
@@ -158,12 +151,7 @@ function map_marker_with_result_set (result_set) {
       boundsDraw: false,
       markers: [],
       icons: [
-          {min: 2, size: {height: markers_icon_size, width: markers_icon_size}, url: "./icons/arma_cluster_img.png", anchor: markers_icon_anchor, label:labelOptions}//,
-          //{min: 11, max: 31, size: {height: markers_icon_size, width: markers_icon_size}, url: "./icons/arma_cluster_img.png", anchor: markers_icon_anchor, label:labelOptions},
-          //{min: 31, max: 91, size: {height: markers_icon_size, width: markers_icon_size}, url: "./icons/arma_cluster_img.png", anchor: markers_icon_anchor, label:labelOptions},
-          //{min: 91, max: 271, size: {height: markers_icon_size, width: markers_icon_size}, url: "./icons/arma_cluster_img.png",anchor: markers_icon_anchor, label:labelOptions},
-          //{min: 271, size: {height: markers_icon_size, width: markers_icon_size}, url: "./icons/arma_cluster_img.png",anchor: markers_icon_anchor, label:labelOptions}//,
-          //{min: 91, url: "./icons/furto_celular.png",anchor: {x: 32,y: 32}}
+          {min: 2, size: {height: markers_icon_size, width: markers_icon_size}, url: "./icons/arma_cluster_img.png", anchor: markers_icon_anchor, label:labelOptions}
       ]
     });
     
@@ -177,7 +165,6 @@ function map_marker_with_result_set (result_set) {
   
         console.log("query: " + query);
         tx.executeSql(query, [], function (tx, resultSet) {
-          //marker.setTitle(resultSet.rows.item(0).RUBRIC);
           var marker_description = '\n' + "Horário: " + substitute_period(resultSet.rows.item(0).PERIOD) +
           '\n' + "Data: " + convert_date_iso_format_to_brazilian_format(resultSet.rows.item(0).DATE);
   
@@ -338,11 +325,6 @@ function convert_date_format_to_sqlite(date) {
   return_string = year + "-" + month + "-" + day;
 
   if (parts.length == 2) {
-    /*var second_half = parts[1].split(":");
-
-    var hours = second_half[0];
-    var minutes = second_half[1];*/
-
     return_string = return_string + " " + parts[1]; // hours + ":" + minutes
   }
 

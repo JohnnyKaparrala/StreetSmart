@@ -47,7 +47,7 @@ document.addEventListener("deviceready", function() {
     
     $("#menu-btn-container").fadeOut(200);
     $("#pesquisa-btn-container").css({display:"none"});
-  }); //onclick="setVar('state','side_menu');"
+  });
 
   $('#close-btn').click(function(/*e*/) {
     $("#pesquisa-input").fadeOut(100);
@@ -177,57 +177,6 @@ function apply_filters (/*event*/) {
   refresh_map_occurrences();
 }
 
-/*const HEATMAP = {id: -1, path_img: ""};
-const FURTO_CELULAR = {id: 0, path_img: "./icons/arma.png"};
-const ROUBO_CELULAR = {id: 1, path_img: "./icons/arma.png"};
-const FURTO_VEICULOS = {id: 2, path_img: "./icons/arma.png"};
-const ROUBO_VEICULOS = {id: 3, path_img: "./icons/arma.png"};
-const LATROCINIO = {id: 4, path_img: "./icons/arma.png"};
-const LESAO_CORPORAL_SEGUIDA_DE_MORTE = {id: 5, path_img: "./icons/arma.png"};
-const HOMICIDIO_DOLOSO = {id: 6, path_img: "./icons/arma.png"};*/
-
-
-/*function mapear_heatmap (dir_json, tipo) {
-  $.getJSON( dir_json, function( data ) {
-    var heatmapData = [];
-    $.each( data, function(key,value) {
-      if (value.LATITUDE != "") {
-        heatmapData.push([parseFloat(value.LATITUDE.replace(",",".")), parseFloat(value.LONGITUDE.replace(",",".")), 5]);}
-      else
-      {
-        console.log("Sem coordenadas");
-      }});
-
-      map_global.addHeatmap({
-        data: heatmapData,
-        radius: 20
-      });
-    });
-}*/
-
-/*function mapear_marker (dir_json, tipo) {
-  $.getJSON( dir_json, function( data ) {
-    $.each( data, function(key,value) {
-      if (value.LATITUDE != "") {
-        map_global.addMarker({
-          position: {lat:parseFloat(value.LATITUDE.replace(",",".")), lng:parseFloat(value.LONGITUDE.replace(",","."))},
-          title: value.RUBRICA,
-          icon: {
-            url: tipo.path_img,
-            size: {
-              width: 56,
-              height: 56
-            },
-            anchor: {x: 23,y: 46}
-          }
-        });
-      } else {
-        console.log("Sem coordenadas");
-      }
-    });
-  });
-}*/
-
 var delta_function = function (zoom) {
   return 353.306270268435128 * Math.exp(-0.676030142340657 * zoom);
 }
@@ -245,33 +194,6 @@ function refresh_map_occurrences() {
 function onMapInit (map) {
   map.on(plugin.google.maps.event.CAMERA_MOVE_END, function(cameraPosition) {
     var delta = delta_function(cameraPosition.zoom);
-
-    /*map_global.addMarker({
-      position: {lat:cameraPosition.target.lat + delta, lng:cameraPosition.target.lng + delta},
-      title: "Test upper right limit of view rectangle",
-      icon: {
-        url: "./icons/transparent_red_circle.png",
-        size: {
-          width: 56,
-          height: 56
-        },
-        anchor: {x: 23,y: 46}
-      }
-    });
-
-    map_global.addMarker({
-      position: {lat:cameraPosition.target.lat - delta, lng:cameraPosition.target.lng - delta},
-      title: "Test lower left limit of view rectangle",
-      icon: {
-        url: "./icons/transparent_red_circle.png",
-        size: {
-          width: 56,
-          height: 56
-        },
-        anchor: {x: 23,y: 46}
-      }
-    });*/
-
     var moved_camera_considerably = true;
     var changed_zoom_considerably = true;
     if (previous_camera_position)
@@ -279,22 +201,16 @@ function onMapInit (map) {
       var d_y = (previous_camera_position.target.lat - cameraPosition.target.lat);
       var d_x = (previous_camera_position.target.lng - cameraPosition.target.lng);
       var distance = Math.sqrt(d_x * d_x + d_y * d_y);
-
-      //console.log("distance/delta: " + (distance/delta));
       
       moved_camera_considerably = ((distance/previous_delta) > dist);
     }
     if (previous_delta) {
-      //console.log("delta difference: " + (Math.abs(delta - previous_delta)));
-      //(delta - previous_delta)/previous_delta = delta/previous_delta - 1
       changed_zoom_considerably = ((delta/previous_delta - 1) > zoom_change);
     }
 
-    //console.log("moved_camera_considerably: " + moved_camera_considerably + "; changed_zoom_considerably: " + changed_zoom_considerably);
     if (!moved_camera_considerably && !changed_zoom_considerably)
       return;
 
-    //console.log("zoom: " + cameraPosition.zoom);
     console.log("delta: " + delta);
 
     if (delta <= 0.1)
@@ -325,25 +241,10 @@ function onMapInit (map) {
   map.animateCamera({
     target: {lat:-22.9064, lng:-47.0616 },
     zoom: 14,
-    //tilt: 1e-20,
     bearing: 0,
     duration: 0
   }, function() {
   });
-
-  /*map.getMyLocation(function(location) {
-    console.log(location);
-    map.animateCamera({
-      target: location.latLng,
-      zoom: 14,
-      //tilt: 1e-20,
-      bearing: 0,
-      duration: 1000
-    }, function() {
-    });
-  }, function() {
-    console.log("error");
-  });*/
   
   $("#rbtn-heatmap").on("click", function (/*event*/) {
     map_state = HEATMAP_STATE;

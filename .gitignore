@@ -2,6 +2,7 @@
 app/hooks
 app/platforms
 *.csv#
+*.code-workspace
 
 # Cordova Global
 app/plugins/
