@@ -3,6 +3,7 @@ app/hooks
 app/platforms
 *.csv#
 *.code-workspace
+app/www/occurrences.db
 
 # Cordova Global
 app/plugins/
