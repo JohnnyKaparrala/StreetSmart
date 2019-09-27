@@ -5,6 +5,12 @@ function setVar (key, value) {
 }
 
 var map_global;
+var previous_camera_position;
+var previous_delta;
+var dist = 0.001;
+var zoom_change = 0.21;
+var go_to_user_location_function_interval_id;
+var user_location;
 
 document.addEventListener("deviceready", function() {
   $('.datepicker').datepicker({
@@ -120,9 +126,6 @@ document.addEventListener("deviceready", function() {
       var firstResult = coordinates[0];
       map_global.animateCamera({
         target: {lat:firstResult.latitude, lng:firstResult.longitude},
-        zoom: 13,
-        tilt: 30,
-        bearing: 0,
         duration: 1000
       }, function() {
       });
@@ -178,27 +181,46 @@ function applyMapFilters(/*event*/) {
     previous_camera_position.target.lat + previous_delta, previous_camera_position.target.lat - previous_delta, query_conditions);
 }
 
-function deltaFunction(zoom) {
-  return 353.306270268435128 * Math.exp(-0.676030142340657 * zoom);
-}
+function distanceBetweenTwoPointsSquared(x1, y1, x2, y2) {
+  var d_x = x1 - x2;
+  var d_y = y1 - y2;
 
-var previous_camera_position;
-var previous_delta;
-var dist = 0.36;
-var zoom_change = 0.21;
+  return d_x * d_x + d_y * d_y;
+}
 
 function onMapInit (map) {
   map.on(plugin.google.maps.event.CAMERA_MOVE_END, function(cameraPosition) {
-    var delta = deltaFunction(cameraPosition.zoom);
+    var visible_region = map_global.getVisibleRegion();
+    var top_left = visible_region.nearLeft;
+    var bottom_right = visible_region.farRight;
+    var top_right = visible_region.nearRight;
+    var bottom_left = visible_region.farLeft;
+
+    var delta = Math.sqrt(distanceBetweenTwoPointsSquared(top_left.lng, top_left.lat, bottom_right.lng, bottom_right.lat));
+
+    // Check if an interval calling the function is active
+    if (go_to_user_location_function_interval_id !== undefined) {
+      var distance = distanceBetweenTwoPointsSquared(user_location.lng, user_location.lat, cameraPosition.target.lng, cameraPosition.target.lat);
+
+      // If camera moved considerabely far from the user location, stop following the user location
+      if (distance > (delta * 0.002)) {
+        clearInterval(go_to_user_location_function_interval_id);
+        go_to_user_location_function_interval_id = undefined;
+
+        var icon = $("#gps-btn-icon");
+        icon.removeClass("blue-text");
+        icon.addClass("black-text");
+      }
+    }
+
     var moved_camera_considerably = true;
     var changed_zoom_considerably = true;
     if (previous_camera_position)
     {
-      var d_y = (previous_camera_position.target.lat - cameraPosition.target.lat);
-      var d_x = (previous_camera_position.target.lng - cameraPosition.target.lng);
-      var distance = (d_x * d_x + d_y * d_y);
+      var centers_distance = distanceBetweenTwoPointsSquared(previous_camera_position.target.lng, previous_camera_position.target.lat, 
+        cameraPosition.target.lng, cameraPosition.target.lat);
       
-      moved_camera_considerably = ((distance/previous_delta) > dist);
+      moved_camera_considerably = ((centers_distance/previous_delta) > dist);
     }
     if (previous_delta) {
       changed_zoom_considerably = ((delta/previous_delta - 1) > zoom_change);
@@ -213,7 +235,12 @@ function onMapInit (map) {
     {
       previous_camera_position = cameraPosition;
       previous_delta = delta;
-      getOccurrencesWithinRectangle(cameraPosition.target.lng + delta, cameraPosition.target.lng - delta, cameraPosition.target.lat + delta, cameraPosition.target.lat - delta);
+
+      var max_lng = Math.max(top_left.lng, bottom_right.lng, top_right.lng, bottom_left.lng) + delta/10;
+      var min_lng = Math.min(top_left.lng, bottom_right.lng, top_right.lng, bottom_left.lng) - delta/10;
+      var max_lat = Math.max(top_left.lat, bottom_right.lat, top_right.lat, bottom_left.lat) + delta/10;
+      var min_lat = Math.min(top_left.lat, bottom_right.lat, top_right.lat, bottom_left.lat) - delta/10;
+      getOccurrencesWithinRectangle(max_lng, min_lng, max_lat, min_lat);
     }
     else
     {
@@ -222,7 +249,7 @@ function onMapInit (map) {
     }
   });
 
-  map.setOptions({
+  /*map.setOptions({
     'gestures': {
       'tilt': false,
       'rotate': false
@@ -232,7 +259,7 @@ function onMapInit (map) {
         'minZoom': 11
       }
     }
-  });
+  });*/
 
   map.animateCamera({
     target: {lat:-22.9064, lng:-47.0616 },
@@ -256,5 +283,25 @@ function onMapInit (map) {
     map_state = MARKERS_STATE;
     map_global.clear();
     mapMarkerWithResultSet(occurrences_within_view);
+  });
+
+  $('#gps-btn').click(function(/*e*/) {
+    var icon = $(this).children("i");
+    icon.removeClass("black-text");
+    icon.addClass("blue-text");
+    goToUserLocation();
+    go_to_user_location_function_interval_id = setInterval(goToUserLocation, 2000);
+  });
+}
+
+function goToUserLocation() {
+  map_global.getMyLocation(function(location) {
+    user_location = location.latLng;
+    map_global.animateCamera({
+      target: location.latLng,
+      duration: 1000
+    });
+  }, function(msg) {
+    console.error(msg);
   });
 }

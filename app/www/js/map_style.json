@@ -76,7 +76,9 @@
     ],
     "controls": {
       "compass": false,
-      "rotateControl": false
+      "rotateControl": false,
+      "myLocationButton": false,
+      "myLocation": true
     },
     "gestures": {
       "tilt": true,
