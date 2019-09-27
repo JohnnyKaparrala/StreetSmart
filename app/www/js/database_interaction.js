@@ -14,8 +14,7 @@ var global_minLat;
 var markers = [];
 var markers_id = new Set();
 var marker_cluster;
-
-var where_conditions = [];
+var heatmap_global;
 
 var result_set_eq;
 
@@ -56,51 +55,85 @@ function getOccurrencesWithinView(result_set) {
   switch (map_state) {
     case MARKERS_STATE:
       map_state = MARKERS_STATE;
-      map_marker_with_result_set(occurrences_within_view);
+      mapMarkerWithResultSet(occurrences_within_view);
       break;
     case HEATMAP_STATE:
       map_state = HEATMAP_STATE;
-      map_heatmap_with_result_set(occurrences_within_view);
+      mapHeatmapWithResultSet(occurrences_within_view);
       break;
   }
 }
 
-function map_heatmap_with_result_set (result_set) {
+function mapHeatmapWithResultSet(result_set) {
   var data = [];
 
   for (var i = 0; i < result_set.rows.length; i++) {
     data.push([result_set.rows.item(i).LATITUDE, result_set.rows.item(i).LONGITUDE, 200.]);
   }
 
-  map_global.addHeatmap({
-    data: data,
-    radius: 20,
-    opacity: 1
-  });
+  if (heatmap_global == null) {
+    heatmap_global = map_global.addHeatmap({
+      data: data,
+      radius: 20,
+      opacity: 1
+    });
+  }
+  else {
+    heatmap_global.setData(data);
+  }
 }
 
-function map_marker_with_result_set (result_set) {
-  function substitute_period(period) {
-    switch (period) {
-      case 'M':
-        return "De manhã";
-      case 'D':
-        return "De madrugada";
-      case 'N':
-        return 'À tarde';
-      case 'E':
-        return 'À noite';
-      case 'U':
-        return 'Em hora incerta';
-    }
-  }
+function convertYesNoFromDb(yes_no) {
+  if (yes_no == 'Y')
+    return 'Sim'
+  else
+    return 'Não'
+}
 
-  function convert_date_iso_format_to_brazilian_format(date) {
-    var date_parts = date.split('-');
+function convertDateFromDbToBrazilianFormat(date) {
+  var date_time_parts = date.split(' ');
 
-    return date_parts[2] + '/' + date_parts[1] + '/' + date_parts[0];
+  var date_parts = date_time_parts[0].split('-');
+
+  var result = date_parts[2] + '/' + date_parts[1] + '/' + date_parts[0];
+
+  if (date_time_parts.length > 1)
+    result += ' ' + date_time_parts[1];
+
+  return result;
+}
+
+function convertPeriodFromDb(period) {
+  switch (period) {
+    case 'M':
+      return "De manhã";
+    case 'D':
+      return "De madrugada";
+    case 'N':
+      return 'À tarde';
+    case 'E':
+      return 'À noite';
+    case 'U':
+      return 'Em hora incerta';
   }
-  
+}
+
+function convertSkinColorFromDb(period) {
+  switch (period) {
+    case 'W':
+      return "Branca";
+    case 'B':
+      return "Preta";
+    case 'P':
+      return 'Parda';
+    case 'R':
+      return 'Vermelha';
+    case 'Y':
+      return 'Amarela';
+  }
+}
+
+function mapMarkerWithResultSet (result_set) {
   // Removes all occurrences that aren't within vision
   for (var i = 0; i < markers.length; i++) {
     var position = markers[i].getPosition();
@@ -165,8 +198,8 @@ function map_marker_with_result_set (result_set) {
   
         console.log("query: " + query);
         tx.executeSql(query, [], function (tx, resultSet) {
-          var marker_description = '\n' + "Horário: " + substitute_period(resultSet.rows.item(0).PERIOD) +
-          '\n' + "Data: " + convert_date_iso_format_to_brazilian_format(resultSet.rows.item(0).DATE);
+          var marker_description = '\n' + "Horário: " + convertPeriodFromDb(resultSet.rows.item(0).PERIOD) +
+          '\n' + "Data: " + convertDateFromDbToBrazilianFormat(resultSet.rows.item(0).DATE);
   
           if (resultSet.rows.item(0).IS_FLAGRANT !== undefined) {
             marker_description += '\n' + (resultSet.rows.item(0).IS_FLAGRANT ? "É flagrante" : "Não é flagrante");
@@ -175,7 +208,7 @@ function map_marker_with_result_set (result_set) {
           marker.showInfoWindow();
 
           marker.on(plugin.google.maps.event.INFO_CLICK, function(/*marker*/) {
-            get_all_details(marker_id);
+            populateAndOpenOccurrenceDetailsModal(marker_id);
           });
         },
         function (tx, error) {
@@ -196,16 +229,13 @@ function map_marker_with_result_set (result_set) {
 function addOccurrence(occurrence) {
   db.transaction(function (tx) {
 
-      var query = "INSERT INTO occurrences (BO_YEAR, BO_NUMBER, BO_BEGIN_TIME, BO_EMISSION_TIME, DATE, PERIOD, IS_FLAGRANT, ADDRESS_STREET, ADDRESS_NUMBER, ADDRESS_DISTRICT, ADDRESS_CITY, ADDRESS_STATE, LATITUDE, LONGITUDE, PLACE_DESCRIPTION, POLICE_STATION_NAME, POLICE_STATION_CIRCUMSCRIPTION, RUBRIC, FATAL_VICTIM, PERSON_SEX, PERSON_AGE, PERSON_SKIN_COLOR, LINKED_NATURE) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
+      var query = "INSERT INTO occurrences (BO_YEAR, BO_NUMBER, BO_BEGIN_TIME, BO_EMISSION_TIME, DATE, PERIOD, IS_FLAGRANT, LATITUDE, LONGITUDE, PLACE_DESCRIPTION, POLICE_STATION_NAME, POLICE_STATION_CIRCUMSCRIPTION, RUBRIC, FATAL_VICTIM, PERSON_SEX, PERSON_AGE, PERSON_SKIN_COLOR, LINKED_NATURE) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
 
       var occurrence_array = [
         occurrence.BO_YEAR, occurrence.BO_NUMBER, 
         occurrence.BO_BEGIN_TIME, occurrence.BO_EMISSION_TIME, 
         occurrence.DATE, occurrence.PERIOD,
-        occurrence.IS_FLAGRANT, 
-        occurrence.ADDRESS_STREET, occurrence.ADDRESS_NUMBER, 
-        occurrence.ADDRESS_DISTRICT, occurrence.ADDRESS_CITY, 
-        occurrence.ADDRESS_STATE, occurrence.LATITUDE, 
+        occurrence.IS_FLAGRANT, occurrence.LATITUDE, 
         occurrence.LONGITUDE, occurrence.PLACE_DESCRIPTION, 
         occurrence.POLICE_STATION_NAME, occurrence.POLICE_STATION_CIRCUMSCRIPTION,
         occurrence.RUBRIC, 
@@ -242,36 +272,46 @@ function addOccurrence(occurrence) {
   });
 }
 
-function get_all_details (marker_id) {
+function populateAndOpenOccurrenceDetailsModal(marker_id) {
   db.transaction(function (tx) {
-    var query = "SELECT BO_YEAR, BO_NUMBER, BO_BEGIN_TIME, BO_EMISSION_TIME, DATE, PERIOD, IS_FLAGRANT, ADDRESS_STREET, ADDRESS_NUMBER, ADDRESS_DISTRICT, ADDRESS_CITY, ADDRESS_STATE, LATITUDE, LONGITUDE, PLACE_DESCRIPTION, POLICE_STATION_NAME, POLICE_STATION_CIRCUMSCRIPTION, RUBRIC, FATAL_VICTIM, PERSON_SEX, PERSON_AGE, PERSON_SKIN_COLOR, LINKED_NATURE FROM occurrences WHERE occurrences.ID= (?) ";
+    var query = "SELECT BO_YEAR, BO_NUMBER, BO_BEGIN_TIME, BO_EMISSION_TIME, DATE, PERIOD, IS_FLAGRANT, LATITUDE, LONGITUDE, PLACE_DESCRIPTION, POLICE_STATION_NAME, POLICE_STATION_CIRCUMSCRIPTION, RUBRIC, FATAL_VICTIM, PERSON_SEX, PERSON_AGE, PERSON_SKIN_COLOR, LINKED_NATURE FROM occurrences WHERE occurrences.ID= (?) ";
 
     tx.executeSql(query, [marker_id], function (tx, resultSet) {
       var rs = resultSet.rows.item(0);
-      console.log((rs.BO_YEAR=="")?"Não fornecido":rs.BO_YEAR);
-      $("#mod_ano").text((rs.BO_YEAR=="")?"Não fornecido":rs.BO_YEAR);
-      $("#mod_numero").text((rs.BO_NUMBER=="")?"Não fornecido":rs.BO_NUMBER);
-      $("#mod_bo_iniciado").text((rs.BO_BEGIN_TIME=="")?"Não fornecido":rs.BO_BEGIN_TIME);
-      $("#mod_bo_emitido").text((rs.BO_EMISSION_TIME=="")?"Não fornecido":rs.BO_EMISSION_TIME);
-      $("#mod_data").text((rs.DATE=="")?"Não fornecido":rs.DATE);
-      $("#mod_periodo").text((rs.PERIOD=="")?"Não fornecido":rs.PERIOD);
-      $("#mod_flagrante").text((rs.IS_FLAGRANT=="")?"Não fornecido":rs.IS_FLAGRANT);
-      $("#mod_rua").text((rs.ADDRESS_STREET=="")?"Não fornecido":rs.ADDRESS_STREET);
-      $("#mod_numero").text((rs.ADDRESS_NUMBER=="")?"Não fornecido":rs.ADDRESS_NUMBER);
-      $("#mod_cidade").text((rs.ADDRESS_DISTRICT=="")?"Não fornecido":rs.ADDRESS_DISTRICT);
-      $("#mod_bairro").text((rs.ADDRESS_CITY=="")?"Não fornecido":rs.ADDRESS_CITY);
-      $("#mod_estado").text((rs.ADDRESS_STATE=="")?"Não fornecido":rs.ADDRESS_STATE);
-      $("#mod_latitude").text((rs.LATITUDE=="")?"Não fornecido":rs.LATITUDE);
-      $("#mod_longitude").text((rs.LONGITUDE=="")?"Não fornecido":rs.LONGITUDE);
-      $("#mod_descricao_local").text((rs.PLACE_DESCRIPTION=="")?"Não fornecido":rs.PLACE_DESCRIPTION);
-      $("#mod_nome_delegacia").text((rs.POLICE_STATION_NAME=="")?"Não fornecido":rs.POLICE_STATION_NAME);
-      $("#mod_delegacia_circunscricao").text((rs.POLICE_STATION_CIRCUMSCRIPTION=="")?"Não fornecido":rs.POLICE_STATION_CIRCUMSCRIPTION);
-      $("#mod_rubrica").text((rs.RUBRIC=="")?"Não fornecido":rs.RUBRIC);
-      $("#mod_vitima_fatal").text((rs.FATAL_VICTIM=="")?"Não fornecido":rs.FATAL_VICTIM);
-      $("#mod_sexo").text((rs.PERSON_SEX=="")?"Não fornecido":rs.PERSON_SEX);
-      $("#mod_idade").text((rs.PERSON_AGE=="")?"Não fornecido":rs.PERSON_AGE);
-      $("#mod_cor_cutis").text((rs.PERSON_SKIN_COLOR=="")?"Não fornecido":rs.PERSON_SKIN_COLOR);
-      $("#mod_natureza_vinculada").text((rs.LINKED_NATURE=="")?"Não fornecido":rs.LINKED_NATURE);
+      console.log(rs.BO_YEAR);
+      $("#mod_ano").text(rs.BO_YEAR);
+      $("#mod_numero").text(rs.BO_NUMBER);
+      $("#mod_bo_iniciado").text((rs.BO_BEGIN_TIME== null)?"Não fornecido":convertDateFromDbToBrazilianFormat(rs.BO_BEGIN_TIME));
+      $("#mod_bo_emitido").text((rs.BO_EMISSION_TIME== null)?"Não fornecido":convertDateFromDbToBrazilianFormat(rs.BO_EMISSION_TIME));
+      $("#mod_data").text((rs.DATE== null)?"Não fornecido":convertDateFromDbToBrazilianFormat(rs.DATE));
+      $("#mod_periodo").text((rs.PERIOD== null)?"Não fornecido":convertPeriodFromDb(rs.PERIOD));
+      $("#mod_flagrante").text((rs.IS_FLAGRANT== null)?"Não fornecido":convertYesNoFromDb(rs.IS_FLAGRANT));
+      /*$("#mod_rua").text((rs.ADDRESS_STREET== null)?"Não fornecido":rs.ADDRESS_STREET);
+      $("#mod_numero").text((rs.ADDRESS_NUMBER== null)?"Não fornecido":rs.ADDRESS_NUMBER);
+      $("#mod_cidade").text((rs.ADDRESS_DISTRICT== null)?"Não fornecido":rs.ADDRESS_DISTRICT);
+      $("#mod_bairro").text((rs.ADDRESS_CITY== null)?"Não fornecido":rs.ADDRESS_CITY);
+      $("#mod_estado").text((rs.ADDRESS_STATE== null)?"Não fornecido":rs.ADDRESS_STATE);*/
+      $("#mod_latitude").text((rs.LATITUDE== null)?"Não fornecido":rs.LATITUDE);
+      $("#mod_longitude").text((rs.LONGITUDE== null)?"Não fornecido":rs.LONGITUDE);
+      $("#mod_descricao_local").text((rs.PLACE_DESCRIPTION== null)?"Não fornecido":rs.PLACE_DESCRIPTION);
+      $("#mod_nome_delegacia").text(rs.POLICE_STATION_NAME);
+      $("#mod_delegacia_circunscricao").text((rs.POLICE_STATION_CIRCUMSCRIPTION== null)?"Não fornecido":rs.POLICE_STATION_CIRCUMSCRIPTION);
+      $("#mod_rubrica").text((rs.RUBRIC== null)?"Não fornecido":rs.RUBRIC);
+
+      if (rs.PERSON_SEX == null) {
+        $("#mod_vitima_fatal").parent().hide();
+        $("#mod_sexo").parent().hide();
+        $("#mod_idade").parent().hide();
+        $("#mod_cor_cutis").parent().hide();
+      }
+      else {
+        $("#mod_vitima_fatal").text((rs.FATAL_VICTIM== null)?"Não fornecido":convertYesNoFromDb(rs.FATAL_VICTIM));
+        $("#mod_sexo").text(rs.PERSON_SEX);
+        $("#mod_idade").text(rs.PERSON_AGE);
+        $("#mod_cor_cutis").text(convertSkinColorFromDb(rs.PERSON_SKIN_COLOR));
+      }
+      
+      $("#mod_natureza_vinculada").text((rs.LINKED_NATURE==null)?"Não fornecido":rs.LINKED_NATURE);
       $("#ocorrencia_detalhes").modal('open');
     },
     function (tx, error) {
@@ -284,19 +324,20 @@ function get_all_details (marker_id) {
 });
 }
 
-function getOccurrencesWithinRectangle(maxLng, minLng, maxLat, minLat) { /* eslint-disable-line no-unused-vars */
+function getOccurrencesWithinRectangle(maxLng, minLng, maxLat, minLat, query_conditions) { /* eslint-disable-line no-unused-vars */
   global_maxLng = maxLng;
   global_minLng = minLng;
   global_maxLat = maxLat;
   global_minLat = minLat;
   db.transaction(function (tx) {
-      var query = "SELECT occurrences.ID, occurrences.LATITUDE, occurrences.LONGITUDE, occurrences.RUBRIC FROM occurrences, occurrences_index WHERE occurrences.ID=occurrences_index.ID ";
+      var query = "SELECT occurrences.ID, occurrences.LATITUDE, occurrences.LONGITUDE, occurrences.RUBRIC FROM occurrences, occurrences_index WHERE occurrences.ID=occurrences_index.ID AND occurrences_index.maxLng<=(?) AND occurrences_index.minLng>=(?) AND occurrences_index.maxLat<=(?) AND occurrences_index.minLat>=(?) ";
       
-      for (var i = 0; i < where_conditions.length; i++) {
-        query += "AND " + where_conditions[i] + " ";
+      if (query_conditions !== undefined)
+      for (var i = 0; i < query_conditions.length; i++) {
+        query += "AND " + query_conditions[i] + " ";
       }
 
-      query += "AND occurrences_index.maxLng<=(?) AND occurrences_index.minLng>=(?) AND occurrences_index.maxLat<=(?) AND occurrences_index.minLat>=(?);";
+      query += ";";
 
       console.log("query: " + query);
       tx.executeSql(query, [maxLng, minLng, maxLat, minLat], function (tx, resultSet) {
@@ -312,7 +353,7 @@ function getOccurrencesWithinRectangle(maxLng, minLng, maxLat, minLat) { /* esli
   });
 }
 
-function convert_date_format_to_sqlite(date) {
+function convertDateToDb(date) {
   // date: DD/MM/YYYY HH:MM
   var return_string = "";
   var parts = date.split(" ");
@@ -331,104 +372,7 @@ function convert_date_format_to_sqlite(date) {
   return return_string;
 }
 
-function insert_json_in_db (dir_json) {
-  function convert_period(period) {
-    period = period.toUpperCase();
-
-    switch (period) {
-      case "PELA MANHÃ":
-        return 'M';
-      case "DE MADRUGADA":
-        return 'D';
-      case "A TARDE":
-        return 'N';
-      case "A NOITE":
-        return 'E';
-      case "EM HORA INCERTA":
-        return 'U';
-    }
-  }
-
-  function convert_yes_no_to_bool(yes_no) {
-    yes_no = yes_no[0].toUpperCase();
-
-    return yes_no == "S";
-  }
-
-  function convert_person_sex(sex) {
-    switch (sex[0].toUpperCase()) {
-      case "M":
-        return "M";
-      case "F":
-        return "F";
-      default:
-        return "U";
-    }
-  }
-
-  function convert_skin_color(skin_color) {
-    skin_color = skin_color.toLowerCase().replace("ã", "a");
-
-    switch (skin_color) {
-      case "branca":
-      case "branco":
-        return 'W';
-      case "negra":
-      case "negro":
-      case "preta":
-      case "preto":
-        return 'B';
-      case "parda":
-      case "pardo":
-        return 'P';
-      case "outros":
-      case "outro":
-        return 'O';
-      case "nao informada":
-      case "nao informado":
-        return 'N';  
-    }
-  }
-
-  $.getJSON( dir_json, function( data ) {
-    $.each( data, function(key,value) {
-      if (value.LATITUDE != "") {
-        var occurrence = {
-          BO_YEAR: (value.ANO_BO != "" ? parseInt(value.ANO_BO) : null),
-          BO_NUMBER: (value.NUM_BO != "" ? parseInt(value.NUM_BO) : null),
-          BO_BEGIN_TIME: (value.BO_INICIADO != "" ? convert_date_format_to_sqlite(value.BO_INICIADO) : null),
-          BO_EMISSION_TIME: (value.BO_EMITIDO != "" ? convert_date_format_to_sqlite(value.BO_EMITIDO) : null),
-          DATE: (value.DATAOCORRENCIA != "" ? convert_date_format_to_sqlite(value.DATAOCORRENCIA) : null),
-          PERIOD: (value.PERIDOOCORRENCIA != "" ? convert_period(value.PERIDOOCORRENCIA) : null),
-          IS_FLAGRANT: (value.FLAGRANTE != "" ? convert_yes_no_to_bool(value.FLAGRANTE) : null),
-          ADDRESS_STREET: (value.LOGRADOURO != "" ? value.LOGRADOURO : null),
-          ADDRESS_NUMBER: (value.NUMERO != "" ? parseInt(value.NUMERO) : null),
-          ADDRESS_DISTRICT: (value.BAIRRO != "" ? value.BAIRRO : null),
-          ADDRESS_CITY: (value.CIDADE != "" ? value.CIDADE : null),
-          ADDRESS_STATE: (value.UF != "" ? value.UF : null),
-          LATITUDE: (value.LATITUDE != "" ? parseFloat(value.LATITUDE.replace(",",".")) : null),
-          LONGITUDE: (value.LONGITUDE != "" ? parseFloat(value.LONGITUDE.replace(",",".")) : null),
-          PLACE_DESCRIPTION: (value.DESCRICAOLOCAL != "" ? value.DESCRICAOLOCAL : null),
-          POLICE_STATION_NAME: (value.DELEGACIA_NOME != "" ? value.DELEGACIA_NOME : null),
-          POLICE_STATION_CIRCUMSCRIPTION: (value.DELEGACIA_CIRCUNSCRICAO != "" ? value.DELEGACIA_CIRCUNSCRICAO : null),
-          RUBRIC: (value.RUBRICA != "" ? value.RUBRICA : null),
-          FATAL_VICTIM: (value.VITIMAFATAL != "" ? convert_yes_no_to_bool(value.VITIMAFATAL) : null),
-          PERSON_SEX: (value.SEXO != "" ? convert_person_sex(value.SEXO) : null),
-          PERSON_AGE: (value.IDADE != "" ? parseInt(value.IDADE) : null),
-          PERSON_SKIN_COLOR: (value.CORCUTIS != "" ? convert_skin_color(value.CORCUTIS) : null),
-          LINKED_NATURE: (value.NATUREZAVINCULADA != "" ? value.NATUREZAVINCULADA : null)
-        }
-
-        addOccurrence(occurrence);
-      } else {
-        console.log("Sem coordenadas");
-      }
-    });
-  });
-}
-
-
-function execute_query(query) {
+function executeQuery(query) {
   db.transaction(function (tx) {
     tx.executeSql(query, [], function(tx, resultSet) {
       result_set_eq = resultSet;

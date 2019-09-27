@@ -1,4 +1,4 @@
-/* globals MARKERS_STATE, HEATMAP_STATE, markers, markers_id, marker_cluster:writable, where_conditions, convert_date_format_to_sqlite, getOccurrencesWithinRectangle, map_heatmap_with_result_set, map_marker_with_result_set, map_state:writable, occurrences_within_view */
+/* globals MARKERS_STATE, HEATMAP_STATE, markers, markers_id, marker_cluster:writable, convertDateToDb, getOccurrencesWithinRectangle, mapHeatmapWithResultSet, mapMarkerWithResultSet, map_state:writable, occurrences_within_view */
 
 function setVar (key, value) {
   window.localStorage.setItem(key, value);
@@ -65,7 +65,7 @@ document.addEventListener("deviceready", function() {
     setVar("state","home");
   });
 
-  $('#aplicar-filtros-btn').click(apply_filters);
+  $('#aplicar-filtros-btn').click(applyMapFilters);
 
   document.addEventListener("backbutton", onBackKeyDown, false);
 
@@ -104,12 +104,10 @@ document.addEventListener("deviceready", function() {
 
   var div = document.getElementById("map_canvas");
   // Create a Google Maps native view under the map_canvas div.
-  var map_style_object;
-  $.getJSON("js/map_style.json", function(result) {
-    map_style_object = result;
+  $.getJSON("js/map_style.json", function(map_style_object) {
+    map_global = plugin.google.maps.Map.getMap(div, map_style_object);
+    map_global.one(plugin.google.maps.event.MAP_READY, onMapInit);
   });
-
-  var map = plugin.google.maps.Map.getMap(div, map_style_object);
 
   window.addEventListener('keyboardDidHide', function() {
     $(':text').blur();
@@ -120,7 +118,7 @@ document.addEventListener("deviceready", function() {
 
     function gogo(coordinates) {
       var firstResult = coordinates[0];
-      map.animateCamera({
+      map_global.animateCamera({
         target: {lat:firstResult.latitude, lng:firstResult.longitude},
         zoom: 13,
         tilt: 30,
@@ -145,12 +143,10 @@ document.addEventListener("deviceready", function() {
   });
 
   setVar("state","home");
-  map.one(plugin.google.maps.event.MAP_READY, onMapInit);
-  map_global = map;
 });
 
-function apply_filters (/*event*/) {
-  where_conditions.splice(0,where_conditions.length); // clear the array
+function applyMapFilters(/*event*/) {
+  var query_conditions = [];
   var period_from_str = $("#period-start-date-datepicker").val();
   var period_until_str = $("#period-end-date-datepicker").val();
 
@@ -165,46 +161,42 @@ function apply_filters (/*event*/) {
     }
 
     occurrences_types_condition += ")";
-    where_conditions.push(occurrences_types_condition);
+    query_conditions.push(occurrences_types_condition);
   }
 
   if (period_from_str != "" && period_until_str != "") {
-    period_from_str = convert_date_format_to_sqlite(period_from_str);
-    period_until_str = convert_date_format_to_sqlite(period_until_str);
+    period_from_str = convertDateToDb(period_from_str);
+    period_until_str = convertDateToDb(period_until_str);
 
     if (period_from_str < period_until_str)
-      where_conditions.push("OCCURRENCES.DATE BETWEEN '" + period_from_str + "' AND '" + period_until_str + "'");
+      query_conditions.push("OCCURRENCES.DATE BETWEEN '" + period_from_str + "' AND '" + period_until_str + "'");
     else
       M.toast({html: 'Data de início deve ser anterior à data de fim. Desconsiderando o período especificado.'});
   }
 
-  refresh_map_occurrences();
+  getOccurrencesWithinRectangle(previous_camera_position.target.lng + previous_delta, previous_camera_position.target.lng - previous_delta,
+    previous_camera_position.target.lat + previous_delta, previous_camera_position.target.lat - previous_delta, query_conditions);
 }
 
-var delta_function = function (zoom) {
+function deltaFunction(zoom) {
   return 353.306270268435128 * Math.exp(-0.676030142340657 * zoom);
 }
 
 var previous_camera_position;
 var previous_delta;
-var dist = 0.6;
+var dist = 0.36;
 var zoom_change = 0.21;
-
-function refresh_map_occurrences() {
-  getOccurrencesWithinRectangle(previous_camera_position.target.lng + previous_delta, previous_camera_position.target.lng - previous_delta,
-    previous_camera_position.target.lat + previous_delta, previous_camera_position.target.lat - previous_delta);
-}
 
 function onMapInit (map) {
   map.on(plugin.google.maps.event.CAMERA_MOVE_END, function(cameraPosition) {
-    var delta = delta_function(cameraPosition.zoom);
+    var delta = deltaFunction(cameraPosition.zoom);
     var moved_camera_considerably = true;
     var changed_zoom_considerably = true;
     if (previous_camera_position)
     {
       var d_y = (previous_camera_position.target.lat - cameraPosition.target.lat);
       var d_x = (previous_camera_position.target.lng - cameraPosition.target.lng);
-      var distance = Math.sqrt(d_x * d_x + d_y * d_y);
+      var distance = (d_x * d_x + d_y * d_y);
       
       moved_camera_considerably = ((distance/previous_delta) > dist);
     }
@@ -258,11 +250,11 @@ function onMapInit (map) {
     }
     markers.splice(0, markers.length);
     markers_id.clear();
-    map_heatmap_with_result_set(occurrences_within_view);
+    mapHeatmapWithResultSet(occurrences_within_view);
   });
   $("#rbtn-marker").on("click", function (/*event*/) {
     map_state = MARKERS_STATE;
     map_global.clear();
-    map_marker_with_result_set(occurrences_within_view);
+    mapMarkerWithResultSet(occurrences_within_view);
   });
 }
